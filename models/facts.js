@@ -19,6 +19,7 @@ const factSchema = new mongoose.Schema({
     minlength: 50,
     maxlength: 500 
   },
+  category: {type: String},
   votePlus: { type: Number, default: 0 },
   voteMinus: { type: Number, default: 0 },
   comments: [commentSchema],
