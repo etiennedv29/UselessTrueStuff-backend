@@ -3,9 +3,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { searchFacts } = require("../controllers/facts");
 
-
-
-
+router.get("/", searchFacts);
 
 module.exports = router;
