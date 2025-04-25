@@ -16,7 +16,7 @@ const factSchema = new mongoose.Schema({
   description: { 
     type: String, 
     required: true,
-    minlength: 50,
+    minlength: 20,
     maxlength: 500 
   },
   category: {type: String},

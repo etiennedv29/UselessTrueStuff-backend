@@ -1,4 +1,4 @@
-const { getFacts } = require("../repository/facts");
+const { getFacts,addFactInDb } = require("../repository/facts");
 
 const searchFacts = async (req, res, next) => {
   try {
@@ -10,4 +10,17 @@ const searchFacts = async (req, res, next) => {
   }
 };
 
-module.exports = { searchFacts };
+const addFact = async (req, res, next) => {
+  try{
+    console.log("adding fact")
+    console.log(req.body)
+    const addedFact = await addFactInDb(req.body)
+    res.json(addedFact)
+  }
+  catch(exception) {
+    console.log(exception);
+    res.status(500).json({ error: "internal Servor Error with db" })
+  }
+} 
+
+module.exports = { addFact, searchFacts };

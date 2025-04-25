@@ -3,8 +3,9 @@
 const express = require("express");
 const router = express.Router();
 
-const { searchFacts } = require("../controllers/facts");
+const { searchFacts,addFact } = require("../controllers/facts");
 
 router.get("/", searchFacts);
+router.post("/addFact", addFact);
 
 module.exports = router;
