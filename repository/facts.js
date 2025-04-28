@@ -3,12 +3,11 @@ const User = require("../models/users");
 const Fact = require("../models/facts");
 
 const getFacts = async ({ category, userId }) => {
-  const searchParams = {
-    category,
-    userId,
-    status:"validated",
-  };
-  return await Fact.find(searchParams).sort({ createdAt: -1 });
+  const searchParams = { status: "validated" };
+  if (category) searchParams.category = category;
+  if (userId) searchParams.userId = userId;
+
+  return await Fact.find(searchParams).sort({ validatedAt: -1 });
 };
 
 const addFactInDb = async (data) => {
@@ -21,24 +20,23 @@ const addFactInDb = async (data) => {
 };
 
 const validateFact = async (ratio, id) => {
-   console.log("repo - updating fact with truth ratio");
-   try {
-     if (ratio >= 0.9) {
-       await Fact.updateOne(
-         { _id: id },
-         { validatedAt: new Date(), status: "validated", trueRatio: ratio }
-       );
-     } else {
-       await Fact.updateOne(
-         { _id: id },
-         { validatedAt: new Date(), status: "rejected", trueRatio: ratio }
-       );
-     }
-   } catch (exception) {
-     console.error("Error while updating fact:", exception);
-     
-   }
- };
+  console.log("repo - updating fact with truth ratio");
+  try {
+    if (ratio >= 0.9) {
+      await Fact.updateOne(
+        { _id: id },
+        { validatedAt: new Date(), status: "validated", trueRatio: ratio }
+      );
+    } else {
+      await Fact.updateOne(
+        { _id: id },
+        { validatedAt: new Date(), status: "rejected", trueRatio: ratio }
+      );
+    }
+  } catch (exception) {
+    console.error("Error while updating fact:", exception);
+  }
+};
 
 const checkFactWithAI = async (description, id) => {
   console.log("repo - checking fact with Le Chat = ", description);
@@ -63,13 +61,12 @@ const checkFactWithAI = async (description, id) => {
     }
   );
   const truthTeller = await responseLeChat.json();
-  console.log(truthTeller)
+  console.log(truthTeller);
   const trueRatio = truthTeller.choices[0].message.content;
   console.log("repo - AI answer truthRatio = ", trueRatio);
 
   //validation du fact avec le ratio
   validateFact(trueRatio, id);
 };
-
 
 module.exports = { getFacts, addFactInDb, validateFact, checkFactWithAI };
