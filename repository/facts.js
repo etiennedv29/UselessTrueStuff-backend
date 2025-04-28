@@ -6,9 +6,9 @@ const getFacts = async ({ category, userId }) => {
   const searchParams = {
     category,
     userId,
-    status:"validated"
+    status:"validated",
   };
-  return await Fact.find().sort({ createdAt: -1 });
+  return await Fact.find(searchParams).sort({ createdAt: -1 });
 };
 
 const addFactInDb = async (data) => {
