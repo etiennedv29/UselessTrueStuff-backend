@@ -6,6 +6,7 @@ const getFacts = async ({ category, userId }) => {
   const searchParams = {
     category,
     userId,
+    status:"validated"
   };
   return await Fact.find(searchParams).sort({ createdAt: -1 });
 };
@@ -25,12 +26,12 @@ const validateFact = async (ratio, id) => {
      if (ratio >= 0.9) {
        await Fact.updateOne(
          { _id: id },
-         { validatedAt: new Date(), status: "Validated", trueRatio: ratio }
+         { validatedAt: new Date(), status: "validated", trueRatio: ratio }
        );
      } else {
        await Fact.updateOne(
          { _id: id },
-         { validatedAt: new Date(), status: "Rejected", trueRatio: ratio }
+         { validatedAt: new Date(), status: "rejected", trueRatio: ratio }
        );
      }
    } catch (exception) {
