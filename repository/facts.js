@@ -7,6 +7,8 @@ const getFacts = async ({ category, userId }) => {
   if (category) searchParams.category = category;
   if (userId) searchParams.userId = userId;
 
+  console.log(category);
+
   return await Fact.find(searchParams).sort({ validatedAt: -1 });
 };
 

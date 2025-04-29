@@ -5,7 +5,7 @@ const router = express.Router();
 
 const { searchFacts,addFact,checkFact } = require("../controllers/facts");
 
-router.get("/", searchFacts);
+router.get("/:category?/:userId?", (req, res) => searchFacts(req, res));
 router.post("/addFact", addFact);
 router.post("/checkFact", checkFact)
 
