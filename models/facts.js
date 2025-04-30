@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const commentSchema = new mongoose.Schema({
   author: { type: String, required: true, minlength: 2, maxlength: 30 },
   text: { type: String, required: true, minlength: 20, maxlength: 500 },
+  submittedAt: { type: Date, required: true },
 });
 
 const factSchema = new mongoose.Schema({
