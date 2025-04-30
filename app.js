@@ -7,6 +7,7 @@ require('./models/connection')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const factsRouter = require('./routes/facts');
+const commentsRouter = require('./routes/comments')
 
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -24,5 +25,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/facts',factsRouter);
+app.use('/comments', commentsRouter)
 
 module.exports = app;
