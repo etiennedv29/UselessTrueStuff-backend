@@ -9,12 +9,26 @@ const getUserByUsername = async (username) => {
   });
 };
 
-const userSignup = async ({ username, password, firstname }) => {
+const getUserByEmail = async (email) => {
+  return await User.findOne({
+    email: { $regex: new RegExp("^" + email + "$", "i") },
+  });
+};
+
+const userSignup = async ({
+  firstName,
+  lastName,
+  username,
+  email,
+  password,
+}) => {
   const hash = bcrypt.hashSync(password, 10);
 
   const newUser = new User({
+    firstName,
+    lastName,
     username,
-    firstname,
+    email,
     password: hash,
     token: uid2(32),
   });
@@ -28,4 +42,4 @@ const checkToken = async (token) => {
   return !!user;
 };
 
-module.exports = { userSignup, checkToken, getUserByUsername };
+module.exports = { userSignup, checkToken, getUserByUsername, getUserByEmail };
