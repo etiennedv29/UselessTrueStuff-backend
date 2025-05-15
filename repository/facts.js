@@ -62,9 +62,11 @@ const checkFactWithAI = async (description, id) => {
       }),
     }
   );
-  const truthTeller = await responseLeChat.json();
-  console.log(truthTeller);
-  const trueRatio = truthTeller.choices[0].message.content;
+  const truthTellerRaw = await responseLeChat.json();
+  const truthTeller= JSON.parse(truthTellerRaw.choices[0].message.content)
+  const trueRatio = truthTeller.trueRatio;
+  const justification = truthTeller.justification
+  const funRatio= truthTeller.funRatio
   console.log("repo - AI answer truthRatio = ", trueRatio);
 
   //validation du fact avec le ratio
