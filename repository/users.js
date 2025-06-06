@@ -15,6 +15,14 @@ const getUserByEmail = async (email) => {
   });
 };
 
+const getUserById = async (id) => {
+  return await User.findById(id);
+};
+
+const getUserByToken = async (token) => {
+  return await User.findOne({ token });
+};
+
 const userSignup = async ({
   firstName,
   lastName,
@@ -42,4 +50,11 @@ const checkToken = async (token) => {
   return !!user;
 };
 
-module.exports = { userSignup, checkToken, getUserByUsername, getUserByEmail };
+module.exports = {
+  userSignup,
+  checkToken,
+  getUserByUsername,
+  getUserByEmail,
+  getUserByToken,
+  getUserById,
+};

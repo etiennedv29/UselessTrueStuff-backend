@@ -1,28 +1,28 @@
 const moment = require("moment");
 const User = require("../models/users");
 const Fact = require("../models/facts");
+const { getUserById, getUserByToken } = require("./users");
 
 const getFacts = async ({ category, userId }) => {
   const searchParams = { status: "validated" };
   if (category) searchParams.category = category;
   if (userId) searchParams.userId = userId;
 
-  console.log(category);
-
-  return await Fact.find(searchParams).sort({ validatedAt: -1 });
+  return await Fact.find(searchParams)
+    .populate("comments")
+    .sort({ validatedAt: -1 });
 };
 
 const addFactInDb = async (data) => {
-  console.log("repo - data that will be posted in the db : ", data);
+  //console.log("repo - data that will be posted in the db : ", data);
   let newFact = new Fact({ ...data });
 
   await newFact.save();
-  console.log("repo - new fact loaded: ", newFact);
+  //console.log("repo - new fact loaded: ", newFact);
   return newFact;
 };
 
 const validateFact = async (ratio, id) => {
-  console.log("repo - updating fact with truth ratio");
   try {
     if (ratio >= 0.9) {
       await Fact.updateOne(
@@ -41,7 +41,7 @@ const validateFact = async (ratio, id) => {
 };
 
 const checkFactWithAI = async (description, id) => {
-  console.log("repo - checking fact with Le Chat = ", description);
+  //console.log("repo - checking fact with Le Chat = ", description);
 
   const responseLeChat = await fetch(
     "https://api.mistral.ai/v1/agents/completions",
@@ -63,14 +63,73 @@ const checkFactWithAI = async (description, id) => {
     }
   );
   const truthTellerRaw = await responseLeChat.json();
-  const truthTeller= JSON.parse(truthTellerRaw.choices[0].message.content)
+  const truthTeller = JSON.parse(truthTellerRaw.choices[0].message.content);
   const trueRatio = truthTeller.trueRatio;
-  const justification = truthTeller.justification
-  const funRatio= truthTeller.funRatio
-  console.log("repo - AI answer truthRatio = ", trueRatio);
+  const justification = truthTeller.justification;
+  const funRatio = truthTeller.funRatio;
 
   //validation du fact avec le ratio
   validateFact(trueRatio, id);
 };
 
-module.exports = { getFacts, addFactInDb, validateFact, checkFactWithAI };
+const getFactById = async (id) => {
+  return Fact.findById(id);
+};
+
+const updateFactWithVotes = async (voteType, voteValue, factId) => {
+  return await Fact.updateOne(
+    { _id: factId },
+    { $inc: { [voteType]: voteValue } }
+  );
+};
+
+const updateUserWithVotes = async (hasVoted, voteType, factId, userId) => {
+  if (hasVoted === true) {
+    return await User.updateOne(
+      { _id: userId },
+      { $pull: { [voteType]: factId } }
+    );
+  } else if (hasVoted === false) {
+    await User.updateOne({ _id: userId }, { $push: { [voteType]: factId } });
+  }
+};
+
+const modifyVoteInDb = async (factId, voteType, userId) => {
+  let userToCheck = await getUserById(userId);
+  let userHasAlreadyVoted = userToCheck[voteType]?.some(
+    (id) => id.toString() === factId
+  );
+
+  //ajuster la valeur de la mise à jour
+  let voteValue;
+  if (voteType === "votePlus" && !userHasAlreadyVoted) {
+    voteValue = 1;
+    updateFactWithVotes(voteType, voteValue, factId);
+    updateUserWithVotes((hasVoted = false), voteType, factId, userId);
+  } else if (voteType === "votePlus" && userHasAlreadyVoted) {
+    voteValue = -1;
+    updateFactWithVotes(voteType, voteValue, factId);
+    updateUserWithVotes((hasVoted = true), voteType, factId, userId);
+  } else if (voteType === "voteMinus" && !userHasAlreadyVoted) {
+    voteValue = -1;
+    updateFactWithVotes(voteType, voteValue, factId);
+    updateUserWithVotes((hasVoted = false), voteType, factId, userId);
+  } else if (voteType === "voteMinus" && userHasAlreadyVoted) {
+    voteValue = 1;
+    updateFactWithVotes(voteType, voteValue, factId);
+    updateUserWithVotes((hasVoted = true), voteType, factId, userId);
+  }
+
+  return 
+};
+
+module.exports = {
+  getFacts,
+  addFactInDb,
+  validateFact,
+  checkFactWithAI,
+  modifyVoteInDb,
+  getFactById,
+  updateUserWithVotes,
+  updateFactWithVotes,
+};

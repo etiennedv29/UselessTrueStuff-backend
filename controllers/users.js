@@ -2,6 +2,7 @@ const {
   userSignup,
   getUserByUsername,
   getUserByEmail,
+  getUserById,
 } = require("../repository/users");
 const { checkBody } = require("../utils/utilFunctions");
 const bcrypt = require("bcrypt");
@@ -25,7 +26,7 @@ const signup = async (req, res, next) => {
 
     if (user === null && checkedemail === null) {
       const { token, username, firstName, _id } = await userSignup(req.body);
-      res.json({ token, username, firstName, _id });
+      res.json({ token, username, firstName, _id,votePlus,voteMinus });
     } else {
       res.status(409).json({ error: "User already exists" });
     }
@@ -49,6 +50,8 @@ const signin = async (req, res, next) => {
         _id: user._id,
         email: user.email,
         firstName: user.firstName,
+        votePlus:user.votePlus,
+        voteMinus:user.voteMinus,
       });
     } else {
       res.json.status(401).json({ error: "User not found or wrong password" });
@@ -59,4 +62,24 @@ const signin = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, signin };
+const findVotesByFactForUser = async (req, res, next) => {
+  console.log("params findVotesByFactForUser = ", req.params);
+  try {
+    const user = await getUserById(req.params.userId);
+    let votePlusCheck = user.votePlus?.some(
+      (id) => id.toString() === req.params.factId
+    );
+    let voteMinusCheck = user.voteMinus?.some(
+      (id) => id.toString() === req.params.factId
+    );
+    console.log({ votePlusCheck });
+    console.log({ voteMinusCheck });
+
+    res.json({ votePlusCheck, voteMinusCheck });
+  } catch (exception) {
+    console.log(exception);
+    res.status(500).json({ error: "internal Servor Error with db" });
+  }
+};
+
+module.exports = { signup, signin, findVotesByFactForUser };

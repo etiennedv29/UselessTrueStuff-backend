@@ -2,6 +2,8 @@ const {
   getFacts,
   addFactInDb,
   checkFactWithAI,
+  modifyVoteInDb,
+  getFactById,
 } = require("../repository/facts");
 
 const searchFacts = async (req, res, next) => {
@@ -13,6 +15,8 @@ const searchFacts = async (req, res, next) => {
     res.status(500).json({ error: "internal Servor Error with db" });
   }
 };
+
+
 
 const addFact = async (req, res, next) => {
   try {
@@ -40,4 +44,21 @@ const checkFact = async (req, res, next) => {
       .json({ error: "internal Servor Error with AI fact checking" });
   }
 };
-module.exports = { addFact, searchFacts, checkFact };
+
+const modifyVote = async (req, res, next) => {
+  try {
+    console.log("modifying vote");
+    const modifiedVote = await modifyVoteInDb(
+      req.body.factId,
+      req.body.voteType,
+      req.body.userId
+    );
+    res.json({ modifiedVote, updated: true });
+  } catch (exception) {
+    console.log(exception);
+    res
+      .status(500)
+      .json({ error: "Internal servor error while modifying votes" });
+  }
+};
+module.exports = { addFact, searchFacts, checkFact, modifyVote };

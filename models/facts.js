@@ -1,7 +1,15 @@
 const mongoose = require("mongoose");
+const { Types } = require("mongoose");
 
 const commentSchema = new mongoose.Schema({
-  author: { type: String, required: true, minlength: 2, maxlength: 30 },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+
   text: { type: String, required: true, minlength: 5, maxlength: 500 },
   submittedAt: { type: Date, required: true },
 });
@@ -21,7 +29,7 @@ const factSchema = new mongoose.Schema({
     maxlength: 500,
   },
   category: { type: String },
-  votePlus: { type: Number, default: 0   },
+  votePlus: { type: Number, default: 0 },
   voteMinus: { type: Number, default: 0 },
   comments: [commentSchema],
   submittedAt: { type: Date, required: true },

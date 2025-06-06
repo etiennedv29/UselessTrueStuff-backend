@@ -3,11 +3,18 @@
 const express = require("express");
 const router = express.Router();
 
-const { searchFacts,addFact,checkFact } = require("../controllers/facts");
+const {
+  searchFacts,
+  addFact,
+  checkFact,
+  modifyVote,
+  findVotesByFactForUser,
+} = require("../controllers/facts");
 
 router.get("/:category?/:userId?", (req, res) => searchFacts(req, res));
 router.post("/addFact", addFact);
-router.post("/checkFact", checkFact)
+router.post("/checkFact", checkFact);
+router.post("/modifyLikes", modifyVote);
 
 
 module.exports = router;
