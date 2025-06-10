@@ -15,7 +15,7 @@ const commentSchema = new mongoose.Schema({
 });
 
 const factSchema = new mongoose.Schema({
-  userID: { type: String, required: true },
+  userID: { type: mongoose.Schema.Types.ObjectId, required: true },
   title: {
     type: String,
     required: true,
