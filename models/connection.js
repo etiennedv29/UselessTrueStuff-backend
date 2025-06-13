@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
 
-const connectionString= "mongodb+srv://admin:admin@cluster0.awuhqwt.mongodb.net/uselessTrueStuff"
-
-//connectionString = process.env.MONGODB_URI //uselessTrueStuff
-
-mongoose.connect(connectionString, {connectTimeoutMS: 2000})
+mongoose.connect(process.env.MONGODB_URI, {connectTimeoutMS: 2000})
     .then ( () => console.log ('Database Connected'))
     .catch (error => console.log(error));
