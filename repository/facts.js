@@ -21,17 +21,27 @@ const addFactInDb = async (data) => {
   return newFact;
 };
 
-const validateFact = async (ratio, id) => {
+const validateFact = async (trueRatio, interestRatio, id) => {
   try {
-    if (ratio >= 0.9) {
+    if (trueRatio >= 0.9 && interestRatio >= 0.5) {
       await Fact.updateOne(
         { _id: id },
-        { validatedAt: new Date(), status: "validated", trueRatio: ratio }
+        {
+          validatedAt: new Date(),
+          status: "validated",
+          trueRatio,
+          interestRatio,
+        }
       );
     } else {
       await Fact.updateOne(
         { _id: id },
-        { validatedAt: new Date(), status: "rejected", trueRatio: ratio }
+        {
+          validatedAt: new Date(),
+          status: "rejected",
+          trueRatio,
+          interestRatio,
+        }
       );
     }
   } catch (exception) {
@@ -41,7 +51,6 @@ const validateFact = async (ratio, id) => {
 
 const checkFactWithAI = async (description, id) => {
   //console.log("repo - checking fact with Le Chat = ", description);
-
   const responseLeChat = await fetch(
     "https://api.mistral.ai/v1/agents/completions",
     {
@@ -61,14 +70,20 @@ const checkFactWithAI = async (description, id) => {
       }),
     }
   );
+  if (!responseLeChat.ok) {
+    const errorText = await responseLeChat.text();
+    console.error("❌ Mistral Error body:\n", errorText);
+    throw new Error(`Mistral API error ${responseLeChat.status}`);
+  }
   const truthTellerRaw = await responseLeChat.json();
+
   const truthTeller = JSON.parse(truthTellerRaw.choices[0].message.content);
   const trueRatio = truthTeller.trueRatio;
   const justification = truthTeller.justification;
-  const funRatio = truthTeller.funRatio;
+  const interestRatio = truthTeller.interestRatio;
 
   //validation du fact avec le ratio
-  validateFact(trueRatio, id);
+  validateFact(trueRatio, interestRatio, id);
 };
 
 const getFactById = async (id) => {
@@ -119,7 +134,7 @@ const modifyVoteInDb = async (factId, voteType, userId) => {
     updateUserWithVotes((hasVoted = true), voteType, factId, userId);
   }
 
-  return 
+  return;
 };
 
 module.exports = {

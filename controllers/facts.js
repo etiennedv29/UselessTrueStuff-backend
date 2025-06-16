@@ -5,6 +5,7 @@ const {
   modifyVoteInDb,
   getFactById,
 } = require("../repository/facts");
+const {getValidPicsumImage} = require("../utils/utilFunctions")
 
 const searchFacts = async (req, res, next) => {
   try {
@@ -16,12 +17,12 @@ const searchFacts = async (req, res, next) => {
   }
 };
 
-
-
 const addFact = async (req, res, next) => {
   try {
-    console.log("adding fact");
-    console.log(req.body);
+    console.log("adding fact in db");
+
+    const validUrl= await getValidPicsumImage();
+    req.body.image=validUrl;
     const addedFact = await addFactInDb(req.body);
     res.json(addedFact);
     return addedFact;

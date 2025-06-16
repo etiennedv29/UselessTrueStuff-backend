@@ -34,13 +34,14 @@ const factSchema = new mongoose.Schema({
   comments: [commentSchema],
   submittedAt: { type: Date, required: true },
   validatedAt: { type: Date },
-  trueRatio: { type: Number, min: 0, max: 1 },
+  trueRatio: { type: Number, min: 0, max: 1,default:null },
+  interestRatio:{type:Number, min:0, max:1, default:null},
   status: {
     type: String,
     enum: ["pending", "validated", "rejected"],
     default: "pending",
   },
-  image: { type: String },
+  image: { type: String, default:"" },
 });
 
 const Fact = mongoose.model("facts", factSchema);
