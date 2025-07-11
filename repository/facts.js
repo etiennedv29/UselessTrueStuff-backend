@@ -137,6 +137,7 @@ const modifyVoteInDb = async (factId, voteType, userId) => {
   return;
 };
 
+
 module.exports = {
   getFacts,
   addFactInDb,

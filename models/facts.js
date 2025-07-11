@@ -29,19 +29,20 @@ const factSchema = new mongoose.Schema({
     maxlength: 500,
   },
   category: { type: String },
+  tags: { type: Array, default: {} },
   votePlus: { type: Number, default: 0 },
   voteMinus: { type: Number, default: 0 },
   comments: [commentSchema],
   submittedAt: { type: Date, required: true },
   validatedAt: { type: Date },
-  trueRatio: { type: Number, min: 0, max: 1,default:null },
-  interestRatio:{type:Number, min:0, max:1, default:null},
+  trueRatio: { type: Number, min: 0, max: 1, default: null },
+  interestRatio: { type: Number, min: 0, max: 1, default: null },
   status: {
     type: String,
     enum: ["pending", "validated", "rejected"],
     default: "pending",
   },
-  image: { type: String, default:"" },
+  image: { type: String, default: "" },
 });
 
 const Fact = mongoose.model("facts", factSchema);
