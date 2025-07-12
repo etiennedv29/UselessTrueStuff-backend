@@ -22,11 +22,25 @@ jobs:
         run: |
           npm install
 
-      - name: Debug secrets
+      - name: Check MongoDB connection
         run: |
-          echo "UTS_MISTRAL_API_KEY is set: ${{ secrets.UTS_MISTRAL_API_KEY != '' }}"
-          echo "FACT_GENERATION_PROMPT is set: ${{ secrets.FACT_GENERATION_PROMPT != '' }}"
-          echo "MISTRAL_AGENT_FACTGENERATOR_ID is set: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID != '' }}"
+            node -e "
+              const mongoose = require('mongoose');
+              mongoose.connect(process.env.MONGODB_URI, { 
+                connectTimeoutMS: 4000,
+                serverSelectionTimeoutMS: 5000 
+              })
+              .then(() => {
+                console.log('Database connected');
+              })
+              .catch(err => {
+                console.error('Error connecting to MongoDB:', err);
+                process.exit(1); 
+              });
+            "
+        env:
+            MONGODB_URI: ${{ secrets.MONGODB_URI }}  # Assure-toi que le secret MONGODB_URI est configuré dans GitHub Secrets
+  
 
       - name: Run the daily fact generator
         env:
