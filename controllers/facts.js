@@ -4,8 +4,11 @@ const {
   checkFactWithAI,
   modifyVoteInDb,
   getFactById,
+  factGenerationByAI
 } = require("../repository/facts");
 const {getValidPicsumImage} = require("../utils/utilFunctions")
+const mongoose = require("mongoose");
+const { Types } = require("mongoose");
 
 const searchFacts = async (req, res, next) => {
   try {
@@ -62,4 +65,46 @@ const modifyVote = async (req, res, next) => {
       .json({ error: "Internal servor error while modifying votes" });
   }
 };
-module.exports = { addFact, searchFacts, checkFact, modifyVote };
+
+const dailyFactGenerator = async () => {
+  try {
+    // Étape 1: Générer un fait via l'IA
+    const fact = await factGenerationByAI();
+    console.log({fact})
+    
+    if (!fact || !fact.title || !fact.description) {
+      throw new Error("Generated fact is incomplete.");
+    }
+
+    // Étape 2: Ajouter le fait dans la base de données
+    const validUrl = await getValidPicsumImage();
+    fact.image = validUrl;  // Ajout d'une image (par exemple une image aléatoire)
+   
+    fact.submittedAt= new Date();
+    fact.userID = new mongoose.Types.ObjectId("687158b82479b2f2a8cb3641")
+    console.log("just before addFact in Db=", fact)
+    const addedFact = await addFactInDb(fact);
+
+    // Étape 3: Vérification du fait avec l'IA
+
+    const checkedFact = await checkFactWithAI(fact.description, addedFact.id);
+    console.log({checkedFact})
+    // Si le fait est validé par l'IA, mettre à jour son statut
+    if (checkedFact.status === "validated") {
+      // On pourrait ajouter une logique ici pour mettre à jour un champ dans la DB si nécessaire
+      console.log("Fact validated:", checkedFact);
+      return checkedFact; // Retourner le fait validé
+    } else {
+      // Si le fait n'est pas validé, on peut tenter de le régénérer ou de prendre des actions
+      console.log("Fact rejected. Regenerating...");
+      
+      // Tentative de régénération du fait (en appelant à nouveau dailyFactGenerator ou en boucle)
+      return await dailyFactGenerator(); // Répéter la génération et la validation
+    }
+  } catch (exception) {
+    console.log("Error during daily fact generation:", exception);
+    throw new Error("Failed to generate or validate daily fact.");
+  }
+};
+
+module.exports = { addFact, searchFacts, checkFact, modifyVote,dailyFactGenerator };

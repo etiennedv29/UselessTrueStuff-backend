@@ -1,0 +1,31 @@
+name: Daily Fact Generator
+
+on:
+  schedule:
+    - cron: '00 19 * * *'  # Exécution tous les jours à 8h UTC
+  workflow_dispatch:  # Permet de lancer manuellement l'action via l'interface GitHub
+
+jobs:
+  generate-fact:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # à updater le cas échéant
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run the daily fact generator
+        env:
+          UTS_MISTRAL_API_KEY: ${{ secrets.UTS_MISTRAL_API_KEY }}  # Utilise les secrets pour tes clés API
+          FACT_GENERATION_PROMPT: ${{ secrets.FACT_GENERATION_PROMPT }}
+          MISTRAL_AGENT_FACTGENERATOR_ID: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID }}
+        run: |
+          node -e "require('.../controllers/facts.js).dailyFactGenerator();"

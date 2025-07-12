@@ -9,6 +9,7 @@ const getFacts = async ({ category, userId }) => {
 
   return await Fact.find(searchParams)
     .populate("comments")
+    .populate("userID")
     .sort({ validatedAt: -1 });
 };
 
@@ -23,34 +24,43 @@ const addFactInDb = async (data) => {
 
 const validateFact = async (trueRatio, interestRatio, id) => {
   try {
+    let validatedFact;
     if (trueRatio >= 0.9 && interestRatio >= 0.5) {
-      await Fact.updateOne(
+      validatedFact = await Fact.findOneAndUpdate(
         { _id: id },
         {
           validatedAt: new Date(),
           status: "validated",
           trueRatio,
           interestRatio,
-        }
+        },
+        { new: true }
       );
     } else {
-      await Fact.updateOne(
+      validatedFact = await Fact.findOneAndUpdate(
         { _id: id },
         {
           validatedAt: new Date(),
           status: "rejected",
           trueRatio,
           interestRatio,
-        }
+        },
+        { new: true }
       );
     }
+    return validatedFact;
   } catch (exception) {
     console.error("Error while updating fact:", exception);
   }
 };
 
 const checkFactWithAI = async (description, id) => {
-  //console.log("repo - checking fact with Le Chat = ", description);
+  console.log(
+    "repo - checking fact with Le Chat = ",
+    description,
+    "&& id = ",
+    id
+  );
   const responseLeChat = await fetch(
     "https://api.mistral.ai/v1/agents/completions",
     {
@@ -66,13 +76,13 @@ const checkFactWithAI = async (description, id) => {
             content: description,
           },
         ],
-        agent_id: process.env.MISTRAL_AGENT_ID,
+        agent_id: process.env.MISTRAL_AGENT_TRUTHCHECKER_ID,
       }),
     }
   );
   if (!responseLeChat.ok) {
     const errorText = await responseLeChat.text();
-    console.error("❌ Mistral Error body:\n", errorText);
+    console.error("❌ Mistral Error body fact verification:\n", errorText);
     throw new Error(`Mistral API error ${responseLeChat.status}`);
   }
   const truthTellerRaw = await responseLeChat.json();
@@ -83,7 +93,9 @@ const checkFactWithAI = async (description, id) => {
   const interestRatio = truthTeller.interestRatio;
 
   //validation du fact avec le ratio
-  validateFact(trueRatio, interestRatio, id);
+  const validatedFact = await validateFact(trueRatio, interestRatio, id);
+  console.log("validatedfact =", validatedFact);
+  return validatedFact;
 };
 
 const getFactById = async (id) => {
@@ -137,6 +149,47 @@ const modifyVoteInDb = async (factId, voteType, userId) => {
   return;
 };
 
+const factGenerationByAI = async () => {
+  try {
+    const responseLeChat = await fetch(
+      "https://api.mistral.ai/v1/agents/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.UTS_MISTRAL_API_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content: process.env.FACT_GENERATION_PROMPT,
+            },
+          ],
+          agent_id: process.env.MISTRAL_AGENT_FACTGENERATOR_ID,
+        }),
+      }
+    );
+    if (!responseLeChat.ok) {
+      const errorText = await responseLeChat.text();
+      console.error("❌ Mistral Error body fact generator:\n", errorText);
+      throw new Error(`Mistral API error ${responseLeChat.status}`);
+    } else {
+      const factGeneratedRaw = await responseLeChat.json();
+      const factGenerated = JSON.parse(
+        factGeneratedRaw.choices[0].message.content
+      );
+      const factGeneratedTitle = factGenerated.title;
+      const factGeneratedDescription = factGenerated.description;
+      return {
+        title: factGeneratedTitle,
+        description: factGeneratedDescription,
+      };
+    }
+  } catch (exception) {
+    console.error("Error while generating fact:", exception);
+  }
+};
 
 module.exports = {
   getFacts,
@@ -147,4 +200,5 @@ module.exports = {
   getFactById,
   updateUserWithVotes,
   updateFactWithVotes,
+  factGenerationByAI,
 };
