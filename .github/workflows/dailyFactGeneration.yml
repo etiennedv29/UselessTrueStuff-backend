@@ -2,8 +2,8 @@ name: Daily Fact Generator
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Exécution tous les jours à Paris : 8h00 en été et 7h00 en hiver
-  workflow_dispatch:  # Permet de lancer manuellement l'action via l'interface GitHub
+    - cron: "0 6 * * *" # Exécution tous les jours à Paris : 8h00 en été et 7h00 en hiver
+  workflow_dispatch: # Permet de lancer manuellement l'action via l'interface GitHub
 
 jobs:
   generate-fact:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '22'  # à updater le cas échéant
+          node-version: "22" # à updater le cas échéant
 
       - name: Install dependencies
         run: |
@@ -28,11 +28,11 @@ jobs:
           echo "FACT_GENERATION_PROMPT is set: ${{ secrets.FACT_GENERATION_PROMPT != '' }}"
           echo "MISTRAL_AGENT_FACTGENERATOR_ID is set: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID != '' }}"
 
-
       - name: Run the daily fact generator
         env:
-          UTS_MISTRAL_API_KEY: ${{ secrets.UTS_MISTRAL_API_KEY }}  # Utilise les secrets pour tes clés API
+          UTS_MISTRAL_API_KEY: ${{ secrets.UTS_MISTRAL_API_KEY }} # Utilise les secrets pour tes clés API
           FACT_GENERATION_PROMPT: ${{ secrets.FACT_GENERATION_PROMPT }}
           MISTRAL_AGENT_FACTGENERATOR_ID: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: |
           node -e "require('./controllers/facts.js').dailyFactGenerator();"
