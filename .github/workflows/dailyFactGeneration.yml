@@ -2,7 +2,7 @@ name: Daily Fact Generator
 
 on:
   schedule:
-    - cron: '00 19 * * *'  # Exécution tous les jours à 8h UTC
+    - cron: '10 19 * * *'  # Exécution tous les jours à 8h UTC
   workflow_dispatch:  # Permet de lancer manuellement l'action via l'interface GitHub
 
 jobs:
