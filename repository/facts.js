@@ -1,6 +1,7 @@
 const User = require("../models/users");
 const Fact = require("../models/facts");
 const { getUserById, getUserByToken } = require("./users");
+const fetch = require('node-fetch');
 
 const getFacts = async ({ category, userId }) => {
   const searchParams = { status: "validated" };
