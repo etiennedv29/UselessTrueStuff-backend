@@ -22,6 +22,13 @@ jobs:
         run: |
           npm install
 
+      - name: Debug secrets
+        run: |
+          echo "UTS_MISTRAL_API_KEY is set: ${{ secrets.UTS_MISTRAL_API_KEY != '' }}"
+          echo "FACT_GENERATION_PROMPT is set: ${{ secrets.FACT_GENERATION_PROMPT != '' }}"
+          echo "MISTRAL_AGENT_FACTGENERATOR_ID is set: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID != '' }}"
+
+
       - name: Run the daily fact generator
         env:
           UTS_MISTRAL_API_KEY: ${{ secrets.UTS_MISTRAL_API_KEY }}  # Utilise les secrets pour tes clés API

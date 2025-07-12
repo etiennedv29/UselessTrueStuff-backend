@@ -62,6 +62,8 @@ const checkFactWithAI = async (description, id) => {
     "&& id = ",
     id
   );
+  console.log("Mistral API Key:", process.env.UTS_MISTRAL_API_KEY);
+console.log("Agent ID:", process.env.MISTRAL_AGENT_FACTGENERATOR_ID);
   const responseLeChat = await fetch(
     "https://api.mistral.ai/v1/agents/completions",
     {
