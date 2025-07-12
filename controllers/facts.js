@@ -9,6 +9,7 @@ const {
 const {getValidPicsumImage} = require("../utils/utilFunctions")
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
+const fetch = require('node-fetch');
 
 const searchFacts = async (req, res, next) => {
   try {
