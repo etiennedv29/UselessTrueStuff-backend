@@ -26,21 +26,30 @@ jobs:
         run: |
             node -e "
               const mongoose = require('mongoose');
-              mongoose.connect(process.env.MONGODB_URI, { 
-                connectTimeoutMS: 4000,
+              const timeout = 5000;  // 5 secondes de timeout pour vérifier la connexion
+        
+              // Timeout avant d'arrêter le processus
+              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Connection timed out'), timeout));
+        
+              // Connexion MongoDB avec promesse
+              const connectPromise = mongoose.connect(process.env.MONGODB_URI, { 
+                useNewUrlParser: true, 
+                useUnifiedTopology: true, 
                 serverSelectionTimeoutMS: 5000 
-              })
-              .then(() => {
-                console.log('Database connected');
-              })
-              .catch(err => {
-                console.error('Error connecting to MongoDB:', err);
-                process.exit(1); 
               });
+        
+              // Utiliser Promise.race pour gérer le timeout
+              Promise.race([connectPromise, timeoutPromise])
+                .then(() => {
+                  console.log('MongoDB connection successful!');
+                })
+                .catch(err => {
+                  console.error('Error connecting to MongoDB:', err);
+                  process.exit(1);  // Stop le workflow si la connexion échoue
+                });
             "
         env:
-            MONGODB_URI: ${{ secrets.MONGODB_URI }}  # Assure-toi que le secret MONGODB_URI est configuré dans GitHub Secrets
-  
+            MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
       - name: Run the daily fact generator
         env:
