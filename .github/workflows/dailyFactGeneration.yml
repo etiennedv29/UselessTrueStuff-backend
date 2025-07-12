@@ -21,6 +21,11 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+        
+      - name: List files in the current directory for debugging
+        run: |
+          pwd  # Affiche le répertoire actuel
+          ls -R  # Liste tous les fichiers dans le répertoire
 
       - name: Run the daily fact generator
         env:
@@ -28,4 +33,4 @@ jobs:
           FACT_GENERATION_PROMPT: ${{ secrets.FACT_GENERATION_PROMPT }}
           MISTRAL_AGENT_FACTGENERATOR_ID: ${{ secrets.MISTRAL_AGENT_FACTGENERATOR_ID }}
         run: |
-          node -e "require('../../controllers/facts.js').dailyFactGenerator();"
+          node -e "require('../controllers/facts.js').dailyFactGenerator();"
