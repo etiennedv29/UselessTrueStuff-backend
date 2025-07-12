@@ -8,9 +8,6 @@ on:
 jobs:
   generate-fact:
     runs-on: ubuntu-latest
-    permissions:
-        contents: read
-        secrets: read
 
     steps:
       - name: Checkout repository
