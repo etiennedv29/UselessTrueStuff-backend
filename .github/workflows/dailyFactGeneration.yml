@@ -31,17 +31,16 @@ jobs:
               // Timeout avant d'arrêter le processus
               const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Connection timed out'), timeout));
         
-              // Connexion MongoDB avec promesse
+              // Connexion MongoDB sans options obsolètes
               const connectPromise = mongoose.connect(process.env.MONGODB_URI, { 
-                useNewUrlParser: true, 
-                useUnifiedTopology: true, 
-                serverSelectionTimeoutMS: 5000 
+                serverSelectionTimeoutMS: 5000  // 5 secondes pour la sélection du serveur
               });
         
               // Utiliser Promise.race pour gérer le timeout
               Promise.race([connectPromise, timeoutPromise])
                 .then(() => {
                   console.log('MongoDB connection successful!');
+                  process.exit(0);  // Terminer proprement et passer à l'étape suivante
                 })
                 .catch(err => {
                   console.error('Error connecting to MongoDB:', err);
