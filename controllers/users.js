@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 const signup = async (req, res, next) => {
   try {
     if (
+      !req.body.connectionWithSocials &&
       !checkBody(req.body, [
         "username",
         "password",
@@ -24,40 +25,42 @@ const signup = async (req, res, next) => {
     const user = await getUserByUsername(req.body.username.toLowerCase());
     const checkedemail = await getUserByEmail(req.body.email.toLowerCase());
 
+
     if (user === null && checkedemail === null) {
-      const { token, username, firstName, _id } = await userSignup(req.body);
-      res.json({ token, username, firstName, _id,votePlus,voteMinus });
+      const userObject = await userSignup(req.body);
+      res.json(userObject);
     } else {
       res.status(409).json({ error: "User already exists" });
     }
   } catch (exception) {
-    console.log(exception);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 const signin = async (req, res, next) => {
+
   try {
-    if (!checkBody(req.body, ["email", "password"])) {
+    if (
+      !req.body.connectionWithSocials &&
+      !checkBody(req.body, ["email", "password"])
+    ) {
       return res.status(400).json({ error: "Missing or empty fields" });
     }
 
     const user = await getUserByEmail(req.body.email.toLowerCase());
 
-    if (user && bcrypt.compareSync(req.body.password, user.password)) {
-      res.json({
-        token: user.token,
-        _id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        votePlus:user.votePlus,
-        voteMinus:user.voteMinus,
-      });
+    if (
+      user &&
+      user.connectionWithSocials === false &&
+      bcrypt.compareSync(req.body.password, user.password)
+    ) {
+      res.json(user);
+    } else if (user && user.connectionWithSocials === true) {
+      res.json(user);
     } else {
-      res.json.status(401).json({ error: "User not found or wrong password" });
+      res.status(401).json({ error: "User not found or wrong password" });
     }
   } catch (exception) {
-    console.log(exception);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

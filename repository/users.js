@@ -29,6 +29,7 @@ const userSignup = async ({
   username,
   email,
   password,
+  connectionWithSocials
 }) => {
   const hash = bcrypt.hashSync(password, 10);
 
@@ -39,6 +40,7 @@ const userSignup = async ({
     email,
     password: hash,
     token: uid2(32),
+    connectionWithSocials
   });
 
   return await newUser.save();
