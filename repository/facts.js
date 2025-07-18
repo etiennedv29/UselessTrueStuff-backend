@@ -3,10 +3,11 @@ const Fact = require("../models/facts");
 const { getUserById, getUserByToken } = require("./users");
 const fetch = require("node-fetch");
 
-const getFacts = async ({ category, userId }) => {
+const getFacts = async ({ category, userId, factId }) => {
   const searchParams = { status: "validated" };
   if (category) searchParams.category = category;
   if (userId) searchParams.userId = userId;
+  if (factId) searchParams._id = factId;
 
   return await Fact.find(searchParams)
     .populate("comments")
@@ -36,7 +37,8 @@ const validateFact = async (
     const interestRatioThreshold = 0.5;
     //définition de validation
     const factValidation =
-      trueRatio >= trueRatioThreshold && interestRatio >= interestRatioThreshold;
+      trueRatio >= trueRatioThreshold &&
+      interestRatio >= interestRatioThreshold;
     //fonction d'update du fact actuellement en statut "pending"
     const findFactAndUpdate = async (status) => {
       const updatedFact = await Fact.findOneAndUpdate(
@@ -61,9 +63,8 @@ const validateFact = async (
     }
     return validatedFact;
   } catch (exception) {
-    console.error("Error while updating fact:", exception)
+    console.error("Error while updating fact:", exception);
   }
-
 };
 
 const checkFactWithAI = async (description, id) => {
@@ -210,19 +211,18 @@ const factGenerationByAI = async () => {
   }
 };
 
-const getTopTags = async ()=>{
+const getTopTags = async () => {
   const topTags = await Fact.aggregate([
     { $match: { status: "validated" } }, // Filtre les faits validés
     { $unwind: "$tags" }, // Déplie le tableau des catégories
-    { $match: { "tags": { $ne: {} } } }, // Filtre les éléments vides {}
+    { $match: { tags: { $ne: {} } } }, // Filtre les éléments vides {}
     { $group: { _id: "$tags", count: { $sum: 1 } } }, // Groupe par catégorie et compte les occurrences
     { $sort: { count: -1 } }, // Trie par fréquence (du plus grand au plus petit)
-    { $limit: 5 } // Limite aux 5 premières catégories
-  ])
+    { $limit: 5 }, // Limite aux 5 premières catégories
+  ]);
 
-  return topTags.map(tag => tag._id)
-
-}
+  return topTags.map((tag) => tag._id);
+};
 module.exports = {
   getFacts,
   addFactInDb,
@@ -233,5 +233,5 @@ module.exports = {
   updateUserWithVotes,
   updateFactWithVotes,
   factGenerationByAI,
-  getTopTags
+  getTopTags,
 };

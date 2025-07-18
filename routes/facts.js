@@ -13,7 +13,7 @@ const {
 } = require("../controllers/facts");
 
 router.get("/topTags", topTags);
-router.get("/search/:category?/:userId?", (req, res) => searchFacts(req, res));
+router.get("/search", (req, res) => searchFacts(req, res));
 router.post("/addFact", addFact);
 router.post("/checkFact", checkFact);
 router.post("/modifyLikes", modifyVote);

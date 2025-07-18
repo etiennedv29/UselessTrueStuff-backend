@@ -11,5 +11,10 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "yarn", "start", "nodemon" ]
+
+CMD [
+  "node", 
+  "-e", 
+  "require('./controllers/facts').dailyFactGenerator().catch(err=>{console.error(err);process.exit(1)})"
+]
 

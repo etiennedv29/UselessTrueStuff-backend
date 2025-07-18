@@ -13,8 +13,9 @@ const { Types } = require("mongoose");
 const fetch = require("node-fetch");
 
 const searchFacts = async (req, res, next) => {
+  console.log(req.query)
   try {
-    const facts = await getFacts(req.params);
+    const facts = await getFacts(req.query);
     res.json(facts);
   } catch (exception) {
     console.log(exception);
