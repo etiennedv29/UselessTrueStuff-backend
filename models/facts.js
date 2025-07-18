@@ -29,7 +29,7 @@ const factSchema = new mongoose.Schema({
     maxlength: 500,
   },
   category: { type: String },
-  tags: { type: Array, default: {} },
+  tags: { type: Array, default: [] },
   votePlus: { type: Number, default: 0 },
   voteMinus: { type: Number, default: 0 },
   comments: [commentSchema],
