@@ -9,12 +9,5 @@ RUN yarn install
 
 COPY . .
 
-EXPOSE 3000
-
-
-CMD [
-  "node", 
-  "-e", 
-  "require('./controllers/facts').dailyFactGenerator().catch(err=>{console.error(err);process.exit(1)})"
-]
+CMD ["node","-e","require('./controllers/facts').dailyFactGenerator().catch(err=>{console.error(err);process.exit(1)})"]
 
