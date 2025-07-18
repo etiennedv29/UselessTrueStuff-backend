@@ -1,7 +1,7 @@
 const User = require("../models/users");
 const Fact = require("../models/facts");
 const { getUserById, getUserByToken } = require("./users");
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 const getFacts = async ({ category, userId }) => {
   const searchParams = { status: "validated" };
@@ -23,36 +23,47 @@ const addFactInDb = async (data) => {
   return newFact;
 };
 
-const validateFact = async (trueRatio, interestRatio, id) => {
+const validateFact = async (
+  trueRatio,
+  interestRatio,
+  justification,
+  tags,
+  id
+) => {
   try {
+    //constantes
+    const trueRatioThreshold = 0.9;
+    const interestRatioThreshold = 0.5;
+    //définition de validation
+    const factValidation =
+      trueRatio >= trueRatioThreshold && interestRatio >= interestRatioThreshold;
+    //fonction d'update du fact actuellement en statut "pending"
+    const findFactAndUpdate = async (status) => {
+      const updatedFact = await Fact.findOneAndUpdate(
+        { _id: id },
+        {
+          validatedAt: new Date(),
+          status,
+          trueRatio,
+          interestRatio,
+          justification,
+          tags,
+        },
+        { new: true }
+      );
+      return updatedFact;
+    };
     let validatedFact;
-    if (trueRatio >= 0.9 && interestRatio >= 0.5) {
-      validatedFact = await Fact.findOneAndUpdate(
-        { _id: id },
-        {
-          validatedAt: new Date(),
-          status: "validated",
-          trueRatio,
-          interestRatio,
-        },
-        { new: true }
-      );
+    if (factValidation) {
+      validatedFact = await findFactAndUpdate("validated");
     } else {
-      validatedFact = await Fact.findOneAndUpdate(
-        { _id: id },
-        {
-          validatedAt: new Date(),
-          status: "rejected",
-          trueRatio,
-          interestRatio,
-        },
-        { new: true }
-      );
+      validatedFact = await findFactAndUpdate("rejected");
     }
     return validatedFact;
   } catch (exception) {
-    console.error("Error while updating fact:", exception);
+    console.error("Error while updating fact:", exception)
   }
+
 };
 
 const checkFactWithAI = async (description, id) => {
@@ -62,8 +73,6 @@ const checkFactWithAI = async (description, id) => {
     "&& id = ",
     id
   );
-  console.log("Mistral API Key:", process.env.UTS_MISTRAL_API_KEY);
-console.log("Agent ID:", process.env.MISTRAL_AGENT_FACTGENERATOR_ID);
   const responseLeChat = await fetch(
     "https://api.mistral.ai/v1/agents/completions",
     {
@@ -94,10 +103,17 @@ console.log("Agent ID:", process.env.MISTRAL_AGENT_FACTGENERATOR_ID);
   const trueRatio = truthTeller.trueRatio;
   const justification = truthTeller.justification;
   const interestRatio = truthTeller.interestRatio;
+  const tags = truthTeller.tags;
 
   //validation du fact avec le ratio
-  const validatedFact = await validateFact(trueRatio, interestRatio, id);
-  console.log("validatedfact =", validatedFact);
+  const validatedFact = await validateFact(
+    trueRatio,
+    interestRatio,
+    justification,
+    tags,
+    id
+  );
+  //console.log("validatedfact =", validatedFact);
   return validatedFact;
 };
 
@@ -194,6 +210,19 @@ const factGenerationByAI = async () => {
   }
 };
 
+const getTopTags = async ()=>{
+  const topTags = await Fact.aggregate([
+    { $match: { status: "validated" } }, // Filtre les faits validés
+    { $unwind: "$tags" }, // Déplie le tableau des catégories
+    { $match: { "tags": { $ne: {} } } }, // Filtre les éléments vides {}
+    { $group: { _id: "$tags", count: { $sum: 1 } } }, // Groupe par catégorie et compte les occurrences
+    { $sort: { count: -1 } }, // Trie par fréquence (du plus grand au plus petit)
+    { $limit: 5 } // Limite aux 5 premières catégories
+  ])
+
+  return topTags.map(tag => tag._id)
+
+}
 module.exports = {
   getFacts,
   addFactInDb,
@@ -204,4 +233,5 @@ module.exports = {
   updateUserWithVotes,
   updateFactWithVotes,
   factGenerationByAI,
+  getTopTags
 };
