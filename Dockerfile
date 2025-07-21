@@ -1,13 +1,13 @@
-FROM node:20.10.0
+# FROM node:20.10.0
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY package*.json ./
-COPY yarn.lock ./
+# COPY package*.json ./
+# COPY yarn.lock ./
 
-RUN yarn install
+# RUN yarn install
 
-COPY . .
+# COPY . .
 
-CMD ["node","-e","require('./controllers/facts').dailyFactGenerator().catch(err=>{console.error(err);process.exit(1)})"]
+# CMD ["node","-e","require('./controllers/facts').dailyFactGenerator().catch(err=>{console.error(err);process.exit(1)})"]
 
