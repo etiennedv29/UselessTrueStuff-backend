@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { dailyFactGenerator } = require("./controllers/facts");
 
 // 1) Open the DB connection first
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser:     true,
   useUnifiedTopology:  true,
   // any other options you use in your server...
