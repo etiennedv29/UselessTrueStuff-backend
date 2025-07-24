@@ -13,7 +13,7 @@ const { Types } = require("mongoose");
 const fetch = require("node-fetch");
 
 const searchFacts = async (req, res, next) => {
-  console.log(req.query)
+  console.log(req.query);
   try {
     const facts = await getFacts(req.query);
     res.json(facts);
@@ -24,8 +24,8 @@ const searchFacts = async (req, res, next) => {
 };
 
 const addFact = async (req, res, next) => {
+  console.log("adding fact in db controller, body == ", req.body);
   try {
-    //console.log("adding fact in db");
     const validUrl = await getValidPicsumImage();
     req.body.image = validUrl;
     const addedFact = await addFactInDb(req.body);
@@ -39,7 +39,7 @@ const addFact = async (req, res, next) => {
 
 const checkFact = async (req, res, next) => {
   try {
-    console.log("controller truth checking");
+    console.log("controller - truth checking");
     const { description, id } = req.body;
     const checkedFact = await checkFactWithAI(description, id);
     res.json(checkedFact);
@@ -73,7 +73,6 @@ const dailyFactGenerator = async () => {
     // Étape 1: Générer un fait via l'IA
     console.log("Demande de génération de fait par l'IA");
     const fact = await factGenerationByAI();
-    
 
     if (!fact || !fact.title || !fact.description) {
       throw new Error("Generated fact is incomplete.");
@@ -116,7 +115,7 @@ const topTags = async (req, res) => {
     res.json(topCategories);
   } catch (exception) {
     console.error(exception);
-    res.status(500).send('Erreur serveur recherche top categories');
+    res.status(500).send("Erreur serveur recherche top categories");
   }
 };
 
