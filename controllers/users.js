@@ -3,6 +3,7 @@ const {
   getUserByUsername,
   getUserByEmail,
   getUserById,
+  updateUserAccount
 } = require("../repository/users");
 const { checkBody } = require("../utils/utilFunctions");
 const bcrypt = require("bcrypt");
@@ -85,4 +86,14 @@ const findVotesByFactForUser = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, signin, findVotesByFactForUser };
+const updateAccount= async (req,res, next)=>{
+  try{
+    const updatedUser = await updateUserAccount(req.body)
+    res.json(updatedUser)
+  }
+  catch(exception){
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+module.exports = { signup, signin, findVotesByFactForUser,updateAccount };

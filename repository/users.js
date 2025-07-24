@@ -52,6 +52,25 @@ const checkToken = async (token) => {
   return !!user;
 };
 
+const updateUserAccount = async (infos) => {
+  try{
+  const { id=infos.userId, username, email } = infos;
+  const updateFields = {};
+
+  if (username) updateFields.username = username;
+  if (email) updateFields.email = email;
+
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: id },
+    { $set: updateFields },
+    { new: true } // renvoie le document modifié
+  );
+  return updatedUser;}
+  catch(exception){
+    res.status(500).json({ error: "Database Error while updating account" });
+  }
+};
+
 module.exports = {
   userSignup,
   checkToken,
@@ -59,4 +78,5 @@ module.exports = {
   getUserByEmail,
   getUserByToken,
   getUserById,
+  updateUserAccount
 };
