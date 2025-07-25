@@ -10,10 +10,9 @@ const {
 const { getValidPicsumImage } = require("../utils/utilFunctions");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
-const fetch = require("node-fetch");
 
 const searchFacts = async (req, res, next) => {
-  console.log(req.query);
+  console.log("controller - searchingFacts");
   try {
     const facts = await getFacts(req.query);
     res.json(facts);
@@ -38,8 +37,8 @@ const addFact = async (req, res, next) => {
 };
 
 const checkFact = async (req, res, next) => {
+  console.log("controller - truth checking");
   try {
-    console.log("controller - truth checking");
     const { description, id } = req.body;
     const checkedFact = await checkFactWithAI(description, id);
     res.json(checkedFact);
@@ -52,8 +51,8 @@ const checkFact = async (req, res, next) => {
 };
 
 const modifyVote = async (req, res, next) => {
+  console.log("modifying vote");
   try {
-    console.log("modifying vote");
     const modifiedVote = await modifyVoteInDb(
       req.body.factId,
       req.body.voteType,

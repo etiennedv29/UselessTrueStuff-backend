@@ -3,9 +3,10 @@ const Fact = require("../models/facts");
 const { getUserById, getUserByToken } = require("./users");
 const fetch = require("node-fetch");
 
-const getFacts = async ({ category, userId, factId }) => {
+const getFacts = async ({ userId, factId,tags }) => {
+
   const searchParams = { status: "validated" };
-  if (category) searchParams.category = category;
+  if (tags) searchParams.tags = tags;
   if (userId) searchParams.userId = userId;
   if (factId) searchParams._id = factId;
 
