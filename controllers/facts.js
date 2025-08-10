@@ -13,6 +13,7 @@ const { Types } = require("mongoose");
 
 const searchFacts = async (req, res, next) => {
   console.log("controller - searchingFacts");
+  console.log("req.query= ", req.query)
   try {
     const facts = await getFacts(req.query);
     res.json(facts);
