@@ -1,6 +1,7 @@
 const {addCommentInDb} = require("../repository/comments");
 
 const addComment = async (req, res, next) => {
+  console.log("trying to add comment")
     try {
       console.log("adding comment");
       console.log(req.body);

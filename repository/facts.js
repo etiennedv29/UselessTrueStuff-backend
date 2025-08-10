@@ -13,6 +13,7 @@ const getFacts = async ({ userId, factId,tags }) => {
   return await Fact.find(searchParams)
     .populate("comments")
     .populate("userID")
+    .populate("comments.author")
     .sort({ validatedAt: -1 });
 };
 

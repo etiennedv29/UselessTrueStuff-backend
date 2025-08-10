@@ -6,10 +6,7 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
     required: true,
-    minlength: 2,
-    maxlength: 30,
   },
-
   text: { type: String, required: true, minlength: 5, maxlength: 500 },
   submittedAt: { type: Date, required: true },
 });
