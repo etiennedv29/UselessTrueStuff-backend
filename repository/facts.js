@@ -2,13 +2,17 @@ const User = require("../models/users");
 const Fact = require("../models/facts");
 const { getUserById, getUserByToken } = require("./users");
 const fetch = require("node-fetch");
+const mongoose = require("mongoose");
+const { Types } = require("mongoose");
 
 const getFacts = async ({ userId, factId,tags }) => {
-
+console.log("repo - getFacts")
+console.log("userId = ", userId, "& factId = ", factId, " & tags = ", tags)
   const searchParams = { status: "validated" };
   if (tags) searchParams.tags = tags;
-  if (userId) searchParams.userId = userId;
+  if (userId) searchParams.userID = new mongoose.Types.ObjectId(userId);
   if (factId) searchParams._id = factId;
+console.log({searchParams})
 
   return await Fact.find(searchParams)
     .populate("comments")
