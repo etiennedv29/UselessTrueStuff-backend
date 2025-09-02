@@ -11,6 +11,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const factsRouter = require('./routes/facts');
 const commentsRouter = require('./routes/comments')
+const emailsRouter = require('./routes/emails')
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/facts',factsRouter);
 app.use('/comments', commentsRouter)
+app.use('/emails',emailsRouter)
 
 //const { dailyFactGenerator } = require("./controllers/facts")
 // const startServer = async () => {

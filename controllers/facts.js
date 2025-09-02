@@ -8,12 +8,13 @@ const {
   getTopTags,
 } = require("../repository/facts");
 const { getValidPicsumImage } = require("../utils/utilFunctions");
+const { sendEmailSafe } = require("../utils/emails");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 
 const searchFacts = async (req, res, next) => {
   console.log("controller - searchingFacts");
-  console.log("req.query= ", req.query)
+  console.log("req.query= ", req.query);
   try {
     const facts = await getFacts(req.query);
     res.json(facts);
@@ -42,6 +43,30 @@ const checkFact = async (req, res, next) => {
   try {
     const { description, id } = req.body;
     const checkedFact = await checkFactWithAI(description, id);
+
+    if (checkedFact.status === "validated") {
+      //envoi de la confirmation par mail
+      sendEmailSafe({
+        to: checkedFact.userID.email,
+        type: "info_validated",
+        ctx: {
+          username: checkedFact.userID.username,
+          title: checkedFact.title,
+          factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
+        },
+      });
+    } else if (checkedFact.status === "rejected") {
+      //envoi du rejet par mail
+      sendEmailSafe({
+        to: checkedFact.userID.email,
+        type: "info_rejected",
+        ctx: {
+          username: checkedFact.userID.username,
+          title: checkedFact.title,
+          reason: "Pas assez vrai, ou pas assez intéressant",
+        },
+      });
+    }
     res.json(checkedFact);
   } catch (exception) {
     console.log(exception);
