@@ -33,15 +33,15 @@ function layout({ subject, bodyHtml }) {
       .footer { padding:14px 20px; font-size:12px; color:#6b7280; }
     </style>
   </head>
-  <body class="wrapper">
-    <table role="presentation" class="container" cellpadding="0" cellspacing="0" width="100%">
-      <tr><td class="header">Useless True Stuff</td></tr>
-      <tr><td class="content">
+  <body className="wrapper">
+    <table role="presentation" className="container" cellpadding="0" cellspacing="0" width="100%">
+      <tr><td className="header">Useless True Stuff</td></tr>
+      <tr><td className="content">
         ${bodyHtml}
-        <hr class="divider" />
-        <p class="muted">Si vous n’êtes pas à l’origine de cette action, vous pouvez ignorer ce message.</p>
+        <hr className="divider" />
+        <p className="muted">Si vous n’êtes pas à l’origine de cette action, vous pouvez ignorer ce message.</p>
       </td></tr>
-      <tr><td class="footer">© ${new Date().getFullYear()} Useless True Stuff</td></tr>
+      <tr><td className="footer">© ${new Date().getFullYear()} Useless True Stuff</td></tr>
     </table>
   </body>
   </html>`;
@@ -71,9 +71,7 @@ const templates = {
     const subject = "Ton info a été validée 🎉";
     const text = `Bravo ${ctx.username}!
   
-  Ton info "${
-    ctx.title || "Ton info"
-  }" a été validée et est maintenant visible.
+  Ton info "${ctx.title || "Ton info"}" a été validée et est maintenant visible.
   ${ctx.factUrl ? `Lien : ${ctx.factUrl}` : ""}
   
   Merci pour ta participation !
@@ -85,7 +83,7 @@ const templates = {
         )}</strong>" a été validée et est maintenant visible.</p>
         ${
           ctx.factUrl
-            ? `<p><a class="cta" href="${esc(
+            ? `<p><a className="cta" href="${esc(
                 ctx.factUrl
               )}">Voir l’info publiée</a></p>`
             : ""
@@ -155,7 +153,7 @@ const templates = {
     const bodyHtml = `
         <p>Bonjour,</p>
         <p>Tu as demandé la réinitialisation de ton mot de passe.</p>
-        <p><a class="cta" href="${esc(
+        <p><a className="cta" href="${esc(
           ctx.resetUrl || "#"
         )}">Réinitialiser mon mot de passe</a></p>
         <p>${esc(expires)}</p>
@@ -178,7 +176,7 @@ const templates = {
         <p>Ton mot de passe a été réinitialisé avec succès.</p>
         ${
           ctx.loginUrl
-            ? `<p><a class="cta" href="${esc(
+            ? `<p><a className="cta" href="${esc(
                 ctx.loginUrl
               )}">Me connecter</a></p>`
             : ""
@@ -208,7 +206,7 @@ const templates = {
         <p>Ton compte a bien été supprimé.</p>
         ${
           ctx.feedbackUrl
-            ? `<p><a class="cta" href="${esc(
+            ? `<p><a className="cta" href="${esc(
                 ctx.feedbackUrl
               )}">Donner mon avis</a></p>`
             : ""
