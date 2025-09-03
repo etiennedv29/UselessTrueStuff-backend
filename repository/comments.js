@@ -18,7 +18,7 @@ const addCommentInDb = async (data) => {
     const updatedFact = await Fact.findByIdAndUpdate(data.factId, {
       $push: { comments: newComment },
     });
-    return updatedFact;
+    return updatedFact.populate("userID");
   } catch (exception) {
     console.error("Error adding comment", exception);
   }

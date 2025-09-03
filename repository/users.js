@@ -31,6 +31,7 @@ const userSignup = async ({
   password,
   connectionWithSocials
 }) => {
+  console.log("dans userSignup", {firstName, password, email,connectionWithSocials})
   const hash = bcrypt.hashSync(password, 10);
 
   const newUser = new User({

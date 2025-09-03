@@ -4,6 +4,7 @@ const { getUserById, getUserByToken } = require("./users");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
+const { sendEmailSafe } = require("../utils/emails");
 
 const getFacts = async ({ userId, factId,tags }) => {
 console.log("repo - getFacts")
@@ -59,11 +60,12 @@ const validateFact = async (
         },
         { new: true }
       );
-      return updatedFact;
+      return updatedFact.populate("userID");
     };
     let validatedFact;
     if (factValidation) {
       validatedFact = await findFactAndUpdate("validated");
+      
     } else {
       validatedFact = await findFactAndUpdate("rejected");
     }
