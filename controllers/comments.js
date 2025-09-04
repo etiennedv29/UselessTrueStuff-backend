@@ -13,6 +13,7 @@ const addComment = async (req, res, next) => {
     res.json(addedComment);
     console.log("addedComment = ", addedComment);
     //envoi de la confirmation du commentaire par mail
+
     sendEmailSafe({
       to: addedComment.userID.email,
       type: "comment_sent",

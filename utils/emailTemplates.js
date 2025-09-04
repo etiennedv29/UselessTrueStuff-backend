@@ -53,14 +53,14 @@ const templates = {
     const subject = "Bienvenue sur Useless True Stuff 🎉";
     const text = `Bonjour ${ctx.firstName || ""},
   
-  Votre inscription est confirmée !
-  Nous sommes heureux de vous compter parmi nous.
+  Ton inscription est confirmée !
+  Nous sommes heureux de te compter parmi nous.
   
   — L’équipe UTS`;
     const bodyHtml = `
         <p>Bonjour ${esc(ctx.firstName || "")},</p>
-        <p><strong>Votre inscription est confirmée !</strong></p>
-        <p>Nous sommes heureux de vous compter parmi nous.</p>
+        <p><strong>Ton inscription est confirmée !</strong></p>
+        <p>Nous sommes heureux de te compter parmi nous.</p>
         <p>— L’équipe UTS</p>
       `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
@@ -191,26 +191,19 @@ const templates = {
     const subject = "Ton compte a été supprimé";
     const text = `Bonjour,
   
-  Ton compte a bien été supprimé.
-  ${
-    ctx.feedbackUrl
-      ? `Ton pouvez donner votre avis ici : ${ctx.feedbackUrl}`
-      : ""
-  }
+  Ton compte a bien été supprimé :
+  - tes données personnelles sont supprimées définitivement 
+  - tes données publiques (commentaires et likes) sont anonymisées
   
   Merci d’avoir fait partie de la communauté.
 
   — L’équipe UTS`;
     const bodyHtml = `
         <p>Bonjour,</p>
-        <p>Ton compte a bien été supprimé.</p>
-        ${
-          ctx.feedbackUrl
-            ? `<p><a className="cta" href="${esc(
-                ctx.feedbackUrl
-              )}">Donner mon avis</a></p>`
-            : ""
-        }
+        <p>Ton compte a bien été supprimé :</p>
+        <p> - tes données personnelles sont supprimées définitivement </p>
+        <p> - tes données publiques (commentaires et likes) sont anonymisées</p>
+        
         <p>Merci d’avoir fait partie de la communauté.</p>
 
         <p>— L’équipe UTS</p>

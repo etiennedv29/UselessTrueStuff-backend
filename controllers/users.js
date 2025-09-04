@@ -4,9 +4,11 @@ const {
   getUserByEmail,
   getUserById,
   updateUserAccount,
+  softDeleteUserById,
 } = require("../repository/users");
 const { checkBody } = require("../utils/utilFunctions");
 const bcrypt = require("bcrypt");
+const { sendEmailSafe } = require("../utils/emails");
 
 const signup = async (req, res, next) => {
   try {
@@ -28,6 +30,13 @@ const signup = async (req, res, next) => {
 
     if (user === null && checkedemail === null) {
       const userObject = await userSignup(req.body);
+      //confirmation par mail avant de renvoyer le nouvel utilisateur au fron
+      sendEmailSafe({
+        to: userObject.email,
+        type: "signup_confirmation",
+        ctx: { firstName: userObject.firstName },
+      });
+
       res.json(userObject);
     } else {
       res.status(409).json({ error: "User already exists" });
@@ -139,4 +148,40 @@ const updateAccount = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, signin, findVotesByFactForUser, updateAccount };
+const deleteAccount = async (req, res) => {
+  //besoin de userId, email,
+  //le user souhaite supprimer son compte: on supprime toutes les données personnelles et on garde les données publiques
+  const { userId, email } = req.body;
+  try {
+    const softDelete = await softDeleteUserById(userId);
+    if (!softDelete) {
+      return res.status(400).json({
+        deleteAccount: false,
+        message: "Utilisateur non trouvé ou déjà supprimé",
+      });
+    }
+    res.status(200).json({
+      deleteAccount: true,
+      message:
+        "Ton compte a été supprimé, tes données perso supprimées et tes données publiques anonymisées",
+    });
+  } catch (error) {
+    res.status(500).json({
+      deleteAccount: false,
+      message: "Internal Servor Error",
+      error: error.message,
+    });
+  }
+  sendEmailSafe({
+    to: email,
+    type: "account_deleted",
+    ctx: {},
+  });
+};
+module.exports = {
+  signup,
+  signin,
+  findVotesByFactForUser,
+  updateAccount,
+  deleteAccount,
+};

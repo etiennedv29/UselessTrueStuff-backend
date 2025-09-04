@@ -72,6 +72,28 @@ const updateUserAccount = async (infos) => {
   }
 };
 
+const softDeleteUserById = async (userId) =>{
+  console.log ("repo softDeleting by userId, userId = ", userId)
+  try {
+    const result = await User.findByIdAndUpdate(
+        userId,
+        {
+            username: "Un 👻 du passé",
+            email: null,
+            firstName:null,
+            lastName:null,
+            password:null,
+            token:null
+        },
+        { new: true } // Retourne le document mis à jour
+    );
+    return result !== null; // true si mis à jour, false si introuvable
+} catch (error) {
+    console.error("Erreur :", error);
+    return false;
+}
+}
+
 module.exports = {
   userSignup,
   checkToken,
@@ -79,5 +101,5 @@ module.exports = {
   getUserByEmail,
   getUserByToken,
   getUserById,
-  updateUserAccount
+  updateUserAccount,softDeleteUserById
 };
