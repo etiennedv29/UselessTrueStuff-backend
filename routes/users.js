@@ -7,6 +7,7 @@ const {
   findVotesByFactForUser,
   updateAccount,
   deleteAccount,
+  forgotPassword,
   resetPassword,
 } = require("../controllers/users");
 
@@ -15,6 +16,7 @@ router.post("/signin", signin);
 router.get("/:factId/:userId", findVotesByFactForUser);
 router.put("/updateAccount", updateAccount);
 router.post("/softDelete", deleteAccount);
-router.post("/resetPassword", resetPassword);
+router.post("/forgotPassword", forgotPassword);
+router.post("/resetPassword", resetPassword)
 
 module.exports = router;

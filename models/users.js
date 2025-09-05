@@ -7,10 +7,10 @@ const userSchema = mongoose.Schema({
   username: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
-  resetPasswordToken:{type:String,default:null},
-  resetPasswordTokenExpirationDate:{type:Date,default:null},
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordTokenExpirationDate: { type: Date, default: null },
   connectionWithSocials: { type: Boolean, required: true },
-  socialConnectionProvider:{type:String,default:null},
+  socialConnectionProvider: { type: String, default: null },
   token: { type: String, required: true },
   createdAt: Date,
   factsSubmitted: [

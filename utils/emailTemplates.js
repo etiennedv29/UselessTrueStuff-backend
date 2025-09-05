@@ -140,8 +140,8 @@ const templates = {
   // 5) Mot de passe oublié
   password_reset_request: (ctx) => {
     const subject = "Réinitialisation de ton mot de passe";
-    const expires = ctx.expiresInMinutes
-      ? `Ce lien expire dans ${ctx.expiresInMinutes} minutes.`
+    const expires = ctx.validityDelay
+      ? `Ce lien expire dans ${ctx.validityDelay*60} minutes.`
       : "Ce lien expire bientôt.";
     const text = `Bonjour,
   
