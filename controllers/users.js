@@ -13,6 +13,7 @@ const { sendEmailSafe } = require("../utils/emails");
 const uid2 = require("uid2");
 
 const signup = async (req, res, next) => {
+  console.log("users controller - signup");
   try {
     if (
       !req.body.connectionWithSocials &&
@@ -49,6 +50,7 @@ const signup = async (req, res, next) => {
 };
 
 const signin = async (req, res, next) => {
+  console.log("users controller - signin");
   try {
     const isSocialConnection = !!req.body.connectionWithSocials;
 
@@ -122,7 +124,10 @@ const signin = async (req, res, next) => {
 };
 
 const findVotesByFactForUser = async (req, res, next) => {
-  console.log("params findVotesByFactForUser = ", req.params);
+  console.log(
+    "users controller - findVotesByFactForUser with params = ",
+    req.params
+  );
   try {
     const user = await getUserById(req.params.userId);
     let votePlusCheck = user.votePlus?.some(
@@ -142,6 +147,7 @@ const findVotesByFactForUser = async (req, res, next) => {
 };
 
 const updateAccount = async (req, res, next) => {
+  console.log("users controller - updateAccount");
   try {
     const updatedUser = await updateUserAccount(req.body);
     res.json(updatedUser);
@@ -151,7 +157,7 @@ const updateAccount = async (req, res, next) => {
 };
 
 const deleteAccount = async (req, res) => {
-  //besoin de userId, email,
+  console.log("users controller - deleteAccount");
   //le user souhaite supprimer son compte: on supprime toutes les données personnelles et on garde les données publiques
   const { userId, email } = req.body;
   try {
@@ -182,7 +188,7 @@ const deleteAccount = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
-  console.log("controller - forgotPassword");
+  console.log("users controller - forgotPassword");
   const { email } = req.body;
   const validityDelay = 15; //toke valide 15min
 
@@ -247,8 +253,8 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
+  console.log("users controller - resetPassword");
   const { token, newPassword } = req.body;
-console.log("body = ", req.body)
   try {
     //on cherche l'utilisateur
     const user = await getUserByResetToken(token);
@@ -260,12 +266,12 @@ console.log("body = ", req.body)
     } else {
       //vérification que le passwordToken existe
       if (user.resetPasswordToken !== token) {
-        console.log("BB")
+        console.log("BB");
         return res
           .status(400)
           .json({ success: false, message: "Token invalide" });
       } else if (new Date() >= user.resetPasswordTokenExpirationDate) {
-        console.log("CC")
+        console.log("CC");
         return res
           .status(400)
           .json({ success: false, message: "Token expiré" });

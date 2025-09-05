@@ -6,14 +6,14 @@ const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 const { sendEmailSafe } = require("../utils/emails");
 
-const getFacts = async ({ userId, factId,tags }) => {
-console.log("repo - getFacts")
-console.log("userId = ", userId, "& factId = ", factId, " & tags = ", tags)
+const getFacts = async ({ userId, factId, tags }) => {
+  console.log("repo - getFacts");
+
   const searchParams = { status: "validated" };
   if (tags) searchParams.tags = tags;
   if (userId) searchParams.userID = new mongoose.Types.ObjectId(userId);
   if (factId) searchParams._id = factId;
-console.log({searchParams})
+  console.log({ searchParams });
 
   return await Fact.find(searchParams)
     .populate("comments")
@@ -23,11 +23,9 @@ console.log({searchParams})
 };
 
 const addFactInDb = async (data) => {
-  //console.log("repo - data that will be posted in the db : ", data);
+  console.log("facts repo - addFactInDb : ", data.slice(0, 30),"...");
   let newFact = new Fact({ ...data });
-
   await newFact.save();
-  //console.log("repo - new fact loaded: ", newFact);
   return newFact;
 };
 
@@ -38,6 +36,7 @@ const validateFact = async (
   tags,
   id
 ) => {
+  console.log("facts repo - validateFact")
   try {
     //constantes
     const trueRatioThreshold = 0.9;
@@ -65,7 +64,6 @@ const validateFact = async (
     let validatedFact;
     if (factValidation) {
       validatedFact = await findFactAndUpdate("validated");
-      
     } else {
       validatedFact = await findFactAndUpdate("rejected");
     }
@@ -77,9 +75,10 @@ const validateFact = async (
 
 const checkFactWithAI = async (description, id) => {
   console.log(
-    "repo - checking fact with Le Chat = ",
-    description,
-    "&& id = ",
+    "facts repo - checking fact with AI = ",
+    description.slice(0, 30),
+    "...",
+    " && id = ",
     id
   );
   const responseLeChat = await fetch(
@@ -127,10 +126,12 @@ const checkFactWithAI = async (description, id) => {
 };
 
 const getFactById = async (id) => {
+  console.log("facts repo - fetFactById")
   return Fact.findById(id);
 };
 
 const updateFactWithVotes = async (voteType, voteValue, factId) => {
+  console.log("facts repo - updateFactWithVotes")
   return await Fact.updateOne(
     { _id: factId },
     { $inc: { [voteType]: voteValue } }
@@ -138,6 +139,7 @@ const updateFactWithVotes = async (voteType, voteValue, factId) => {
 };
 
 const updateUserWithVotes = async (hasVoted, voteType, factId, userId) => {
+  console.log("facts repo - updateUserWithVotes")
   if (hasVoted === true) {
     return await User.updateOne(
       { _id: userId },
@@ -149,6 +151,7 @@ const updateUserWithVotes = async (hasVoted, voteType, factId, userId) => {
 };
 
 const modifyVoteInDb = async (factId, voteType, userId) => {
+  console.log("facts repo - modifyVoteInDb")
   let userToCheck = await getUserById(userId);
   let userHasAlreadyVoted = userToCheck[voteType]?.some(
     (id) => id.toString() === factId

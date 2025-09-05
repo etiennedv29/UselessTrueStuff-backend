@@ -12,7 +12,11 @@ const commentSchema = new mongoose.Schema({
 });
 
 const factSchema = new mongoose.Schema({
-  userID: { type: mongoose.Schema.Types.ObjectId, ref: 'users',required: true },
+  userID: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -33,6 +37,7 @@ const factSchema = new mongoose.Schema({
   validatedAt: { type: Date },
   trueRatio: { type: Number, min: 0, max: 1, default: null },
   interestRatio: { type: Number, min: 0, max: 1, default: null },
+  justification: { type: String, default: "" },
   status: {
     type: String,
     enum: ["pending", "validated", "rejected"],

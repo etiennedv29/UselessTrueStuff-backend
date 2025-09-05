@@ -1,7 +1,7 @@
 const { sendTransactional,sendEmailSafe } = require("../utils/emails");
 
 const sendEmails = async (req, res) => {
-  console.log("controller - sending emails");
+  console.log("emails controller - sendEmails");
   try {
     const {to, type, ctx} = req.body;
     //const { to, subject, text, html } = req.body;

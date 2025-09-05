@@ -13,8 +13,7 @@ const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 
 const searchFacts = async (req, res, next) => {
-  console.log("controller - searchingFacts");
-  console.log("req.query= ", req.query);
+  console.log("facts controller - searchFacts with query = ", req.query);
   try {
     const facts = await getFacts(req.query);
     res.json(facts);
@@ -25,7 +24,7 @@ const searchFacts = async (req, res, next) => {
 };
 
 const addFact = async (req, res, next) => {
-  console.log("adding fact in db controller, body == ", req.body);
+  console.log("facts controller - addFact");
   try {
     const validUrl = await getValidPicsumImage();
     req.body.image = validUrl;
@@ -39,15 +38,23 @@ const addFact = async (req, res, next) => {
 };
 
 const checkFact = async (req, res, next) => {
-  console.log("controller - truth checking");
+  console.log("facts controller - checkFact");
   try {
     const { description, id } = req.body;
     const checkedFact = await checkFactWithAI(description, id);
 
+    //Prise en compte du cas où le fact est generated par dailyFact (sans mail)
+    let email = "";
+
+    if (!checkedFact.userID.email) {
+      email = "edevalmont@gmail.com";
+    } else {
+      email = checkedFact.userID.email;
+    }
     if (checkedFact.status === "validated") {
-      //envoi de la confirmation par mail
+      //envoi de la validation par mail
       sendEmailSafe({
-        to: checkedFact.userID.email,
+        to: email,
         type: "info_validated",
         ctx: {
           username: checkedFact.userID.username,
@@ -63,7 +70,9 @@ const checkFact = async (req, res, next) => {
         ctx: {
           username: checkedFact.userID.username,
           title: checkedFact.title,
-          reason: "Pas assez vrai, ou pas assez intéressant",
+          reason:
+            checkedFact.justification ||
+            "Pas assez vrai, ou pas assez intéressant",
         },
       });
     }
@@ -77,7 +86,7 @@ const checkFact = async (req, res, next) => {
 };
 
 const modifyVote = async (req, res, next) => {
-  console.log("modifying vote");
+  console.log("facts Controller - modifyVote");
   try {
     const modifiedVote = await modifyVoteInDb(
       req.body.factId,
