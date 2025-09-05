@@ -3,12 +3,14 @@ const {
   getUserByUsername,
   getUserByEmail,
   getUserById,
+  getUserByResetToken,
   updateUserAccount,
   softDeleteUserById,
 } = require("../repository/users");
 const { checkBody } = require("../utils/utilFunctions");
 const bcrypt = require("bcrypt");
 const { sendEmailSafe } = require("../utils/emails");
+const uid2 = require("uid2");
 
 const signup = async (req, res, next) => {
   try {
@@ -178,10 +180,135 @@ const deleteAccount = async (req, res) => {
     ctx: {},
   });
 };
+
+const forgotPassword = async (req, res) => {
+  console.log("controller - forgotPassword");
+  const { email } = req.body;
+  const validityDelay = 15; //toke valide 15min
+
+  try {
+    const user = await getUserByEmail(email);
+    // Vérification qu'il y a bien un compte pour cet email
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Aucun compte associé à cet email" });
+    }
+
+    //Cas où l'utilisateur est connecté avec social Login
+    if (user.connectionWithSocials) {
+      return res.status(400).json({
+        success: false,
+        socialConnectionProvider: user.socialConnectionProvider,
+        message: "Compte en social Login",
+      });
+    }
+
+    //génération du token temporaire
+    const resetPasswordToken = uid2(32);
+    const resetPasswordTokenExpirationDate = new Date();
+
+    // validité 15min
+    resetPasswordTokenExpirationDate.setMinutes(
+      resetPasswordTokenExpirationDate.getMinutes() + validityDelay
+    );
+
+    //Sauvegarder le token pour l'utilisateur
+    console.log({ resetPasswordTokenExpirationDate });
+    const updatedUser = await updateUserAccount({
+      email,
+      resetPasswordToken,
+      resetPasswordTokenExpirationDate,
+    });
+
+    // créer le lien de réinitilisation
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+
+    //Envoyer à l'utilisateur un lien de reset
+    sendEmailSafe({
+      to: email,
+      type: "password_reset_request",
+      ctx: {
+        firstName: user.firstName,
+        resetPasswordToken,
+        validityDelay,
+        resetUrl,
+      },
+    });
+
+    res.status(200).json({
+      sucess: true,
+      message: "Un mail de réinitialisation du mot de passe t'a été envoyé",
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Internal servor error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+console.log("body = ", req.body)
+  try {
+    //on cherche l'utilisateur
+    const user = await getUserByResetToken(token);
+    if (!user) {
+      console.log("AA");
+      return res
+        .status(400)
+        .json({ success: false, message: "Utilisateur inconnu" });
+    } else {
+      //vérification que le passwordToken existe
+      if (user.resetPasswordToken !== token) {
+        console.log("BB")
+        return res
+          .status(400)
+          .json({ success: false, message: "Token invalide" });
+      } else if (new Date() >= user.resetPasswordTokenExpirationDate) {
+        console.log("CC")
+        return res
+          .status(400)
+          .json({ success: false, message: "Token expiré" });
+      }
+    }
+
+    // Hacher le nouveau mot de passe
+    const hash = bcrypt.hashSync(newPassword, 10);
+
+    console.log("all infos ok, time to update");
+    //udpate l'utilisateur avec le nouveau mot de passe et supprimer le token et expiration
+    const password = hash;
+    const resetPasswordToken = null;
+    const resetPasswordTokenExpirationDate = null;
+    const updatedUser = await updateUserAccount({
+      email: user.email,
+      password,
+      resetPasswordToken,
+      resetPasswordTokenExpirationDate,
+    });
+
+    if (!updatedUser) {
+      return res.status(400).json({
+        sucess: false,
+        message: "Erreur à l'enregistrement du nouveau mot de passe",
+      });
+    } else {
+      return res.status(200).json({
+        sucess: true,
+        message: "Ton mot de passe a bien été réinitialisé",
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 module.exports = {
   signup,
   signin,
   findVotesByFactForUser,
   updateAccount,
   deleteAccount,
+  forgotPassword,
+  resetPassword,
 };
