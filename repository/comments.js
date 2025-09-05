@@ -4,17 +4,15 @@ const Fact = require("../models/facts");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 
-
 const addCommentInDb = async (data) => {
-  console.log("repo - comment that will be posted in the db : ", data);
+  console.log("repo - addCommentInDb : ", data.slice(0, 30));
 
   try {
     let newComment = {
       author: new mongoose.Types.ObjectId(data.author),
-      text: data.text,  
+      text: data.text,
       submittedAt: data.submittedAt,
     };
-    console.log("newComment added to db? ", newComment)
     const updatedFact = await Fact.findByIdAndUpdate(data.factId, {
       $push: { comments: newComment },
     });

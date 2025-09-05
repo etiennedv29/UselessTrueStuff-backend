@@ -12,7 +12,7 @@ const userSchema = mongoose.Schema({
   connectionWithSocials: { type: Boolean, required: true },
   socialConnectionProvider: { type: String, default: null },
   token: { type: String, required: true },
-  createdAt: Date,
+  createdAt: { type: Date, default: Date.now },
   factsSubmitted: [
     {
       type: mongoose.Schema.Types.ObjectId,

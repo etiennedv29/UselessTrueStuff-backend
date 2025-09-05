@@ -2,18 +2,16 @@ const { addCommentInDb } = require("../repository/comments");
 const{sendEmailSafe} = require("../utils/emails")
 
 const addComment = async (req, res, next) => {
-  console.log("trying to add comment");
+  console.log("comment Controller - addComment");
   try {
-    console.log("adding comment");
-    console.log(req.body);
+    console.log("adding comment : ", req.body.slice(0,30));
     const addedComment = await addCommentInDb(req.body);
     if (!addedComment) {
       return res.status(500).json({ error: "Comment was not added" });
     }
     res.json(addedComment);
-    console.log("addedComment = ", addedComment);
-    //envoi de la confirmation du commentaire par mail
 
+    //envoi de la confirmation du commentaire par mail
     sendEmailSafe({
       to: addedComment.userID.email,
       type: "comment_sent",

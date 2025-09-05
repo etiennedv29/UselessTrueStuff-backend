@@ -4,28 +4,33 @@ const bcrypt = require("bcrypt");
 const uid2 = require("uid2");
 
 const getUserByUsername = async (username) => {
+  console.log("users repo - getUserByUsername");
   return await User.findOne({
     username: { $regex: new RegExp("^" + username + "$", "i") },
   });
 };
 
 const getUserByEmail = async (email) => {
+  console.log("users repo - getUserByEmail");
   return await User.findOne({
     email: { $regex: new RegExp("^" + email + "$", "i") },
   });
 };
 
 const getUserById = async (id) => {
+  console.log("users repo - getUserById");
   return await User.findById(id);
 };
 
 const getUserByToken = async (token) => {
+  console.log("users repo - getUserByToken");
   return await User.findOne({ token });
 };
 
-const getUserByResetToken = async (resetPasswordToken )=>{
-  return await User.findOne({resetPasswordToken})
-}
+const getUserByResetToken = async (resetPasswordToken) => {
+  console.log("users repo - get UserByResetToken");
+  return await User.findOne({ resetPasswordToken });
+};
 
 const userSignup = async ({
   firstName,
@@ -35,7 +40,7 @@ const userSignup = async ({
   password,
   connectionWithSocials,
 }) => {
-  console.log("dans userSignup", {
+  console.log("users repo - userSignup : ", {
     firstName,
     password,
     email,
@@ -57,13 +62,14 @@ const userSignup = async ({
 };
 
 const checkToken = async (token) => {
+  console.log("users repo - checkToken");
   const user = await User.findOne({ token });
   console.log(user, !!user);
   return !!user;
 };
 
 const updateUserAccount = async (infos) => {
-  console.log({infos})
+  console.log("users repo - updateUserAccount");
   try {
     const {
       id = infos.userId,
@@ -75,11 +81,14 @@ const updateUserAccount = async (infos) => {
     } = infos;
     const updateFields = {};
 
-    if ('username' in infos) updateFields.username = username;
-    if ('email' in infos) updateFields.email = email;
-    if ('resetPasswordToken' in infos) updateFields.resetPasswordToken = resetPasswordToken;
-    if ('resetPasswordTokenExpirationDate' in infos) updateFields.resetPasswordTokenExpirationDate = resetPasswordTokenExpirationDate;
-    if ('password' in infos) updateFields.password = password;
+    if ("username" in infos) updateFields.username = username;
+    if ("email" in infos) updateFields.email = email;
+    if ("resetPasswordToken" in infos)
+      updateFields.resetPasswordToken = resetPasswordToken;
+    if ("resetPasswordTokenExpirationDate" in infos)
+      updateFields.resetPasswordTokenExpirationDate =
+        resetPasswordTokenExpirationDate;
+    if ("password" in infos) updateFields.password = password;
 
     if (id) {
       const updatedUser = await User.findOneAndUpdate(
@@ -89,7 +98,6 @@ const updateUserAccount = async (infos) => {
       );
       return updatedUser;
     } else if (email) {
-
       const updatedUser = await User.findOneAndUpdate(
         { email: email },
         { $set: updateFields },
@@ -103,7 +111,7 @@ const updateUserAccount = async (infos) => {
 };
 
 const softDeleteUserById = async (userId) => {
-  console.log("repo softDeleting by userId, userId = ", userId);
+  console.log("users repo-  softDeleteUserById");
   try {
     const result = await User.findByIdAndUpdate(
       userId,
