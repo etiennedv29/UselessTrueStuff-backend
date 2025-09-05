@@ -15,7 +15,22 @@ const { Types } = require("mongoose");
 const searchFacts = async (req, res, next) => {
   console.log("facts controller - searchFacts with query = ", req.query);
   try {
-    const facts = await getFacts(req.query);
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const tags = req.query.tags || ""
+
+    // Valider que offset et limit sont des nombres positifs
+    if (isNaN(offset) || isNaN(limit) || offset < 0 || limit < 1) {
+      return res
+        .status(400)
+        .json({ error: "offset et limit doivent être des entiers positifs" });
+    }
+
+    const facts = await getFacts({userId:req.query.userId, factId:req.query.factId, tags:req.query.tags,offset,limit});
+    // Log pour débogage
+    console.log(
+      `Retourne ${facts.length} facts (offset: ${offset}, limit: ${limit})`
+    );
     res.json(facts);
   } catch (exception) {
     console.log(exception);
