@@ -34,7 +34,7 @@ const getFacts = async ({ userId, factId, tags, offset, limit }) => {
 };
 
 const addFactInDb = async (data) => {
-  console.log("facts repo - addFactInDb : ", data.slice(0, 30), "...");
+  console.log("facts repo - addFactInDb : ", data?.description.slice(0, 30), "...");
   let newFact = new Fact({ ...data });
   await newFact.save();
   return newFact;
