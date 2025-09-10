@@ -147,9 +147,9 @@ const dailyFactGenerator = async () => {
         " caractères"
       );
       return dailyFactGenerator();
-    } else {
-      const addedFact = await addFactInDb(fact);
     }
+
+    const addedFact = await addFactInDb(fact);
 
     // Étape 3: Vérification du fait avec l'IA
 

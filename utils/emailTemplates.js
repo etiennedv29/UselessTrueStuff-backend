@@ -22,11 +22,11 @@ function layout({ subject, bodyHtml }) {
         font-family: "Trebuchet MS","Lucida Sans Unicode","Lucida Grande","Lucida Sans",Arial,sans-serif;
         color:#0b0c1a;
       }
-      .header { background:#0b0c1a; color:#1ad4ff; padding:16px 20px; font-weight:700; font-size:18px; }
+      .header { background:#0b0c1a; color:#FFFB08; padding:16px 20px; font-weight:700; font-size:18px; }
       .content { padding:20px; line-height:1.6; font-size:16px; }
       .cta {
         display:inline-block; padding:10px 16px; border-radius:8px; text-decoration:none;
-        background:#1ad4ff; color:#0b0c1a; font-weight:700;
+        background:#FFFB08; color:#0b0c1a; font-weight:700;
       }
       .muted { color:#6b7280; font-size:13px; }
       .divider { height:1px; background:#e8e8ef; border:0; margin:16px 0; }
@@ -141,7 +141,7 @@ const templates = {
   password_reset_request: (ctx) => {
     const subject = "Réinitialisation de ton mot de passe";
     const expires = ctx.validityDelay
-      ? `Ce lien expire dans ${ctx.validityDelay*60} minutes.`
+      ? `Ce lien expire dans ${ctx.validityDelay * 60} minutes.`
       : "Ce lien expire bientôt.";
     const text = `Bonjour,
   
