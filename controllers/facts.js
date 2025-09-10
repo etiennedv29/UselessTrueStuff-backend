@@ -17,7 +17,7 @@ const searchFacts = async (req, res, next) => {
   try {
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const tags = req.query.tags || ""
+    const tags = req.query.tags || "";
 
     // Valider que offset et limit sont des nombres positifs
     if (isNaN(offset) || isNaN(limit) || offset < 0 || limit < 1) {
@@ -26,7 +26,13 @@ const searchFacts = async (req, res, next) => {
         .json({ error: "offset et limit doivent être des entiers positifs" });
     }
 
-    const facts = await getFacts({userId:req.query.userId, factId:req.query.factId, tags:req.query.tags,offset,limit});
+    const facts = await getFacts({
+      userId: req.query.userId,
+      factId: req.query.factId,
+      tags: req.query.tags,
+      offset,
+      limit,
+    });
     // Log pour débogage
     console.log(
       `Retourne ${facts.length} facts (offset: ${offset}, limit: ${limit})`
@@ -122,7 +128,7 @@ const dailyFactGenerator = async () => {
     // Étape 1: Générer un fait via l'IA
     console.log("Demande de génération de fait par l'IA");
     const fact = await factGenerationByAI();
-    console.log("IA generated fact = ", fact)
+    console.log("IA generated fact = ", fact);
     if (!fact || !fact.title || !fact.description) {
       throw new Error("Generated fact is incomplete.");
     }
@@ -134,7 +140,16 @@ const dailyFactGenerator = async () => {
     fact.submittedAt = new Date();
     fact.userID = new mongoose.Types.ObjectId("687158b82479b2f2a8cb3641");
     console.log("just before addFact in Db=", fact);
-    const addedFact = await addFactInDb(fact);
+    if (fact.title.length > 33) {
+      console.log(
+        "le titre est trop long, longueur : ",
+        fact.title.length,
+        " caractères"
+      );
+      return dailyFactGenerator();
+    } else {
+      const addedFact = await addFactInDb(fact);
+    }
 
     // Étape 3: Vérification du fait avec l'IA
 
