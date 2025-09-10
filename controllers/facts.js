@@ -122,7 +122,7 @@ const dailyFactGenerator = async () => {
     // Étape 1: Générer un fait via l'IA
     console.log("Demande de génération de fait par l'IA");
     const fact = await factGenerationByAI();
-
+    console.log("IA generated fact = ", fact)
     if (!fact || !fact.title || !fact.description) {
       throw new Error("Generated fact is incomplete.");
     }
