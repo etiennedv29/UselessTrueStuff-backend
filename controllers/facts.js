@@ -123,7 +123,7 @@ const modifyVote = async (req, res, next) => {
   }
 };
 
-const dailyFactGenerator = async () => {
+const dailyFactGenerator = async (attempt = 1) => {
   try {
     // Étape 1: Générer un fait via l'IA
     console.log("Demande de génération de fait par l'IA");
@@ -169,7 +169,13 @@ const dailyFactGenerator = async () => {
     }
   } catch (exception) {
     console.log("Error during daily fact generation:", exception);
-    throw new Error("Failed to generate or validate daily fact.");
+    if (attempt < 2) {
+      console.log("Echec tentative #1 dailyFactGenerator");
+      return dailyFactGenerator(attempt + 1);
+    } else {
+      console.log("Echec tentative #2 dailyFactGenerator. Abort. ");
+      throw new Error("Failed to generate or validate daily fact.");
+    }
   }
 };
 

@@ -220,6 +220,7 @@ const factGenerationByAI = async () => {
       throw new Error(`Mistral API error ${responseLeChat.status}`);
     } else {
       const factGeneratedRaw = await responseLeChat.json();
+      console.log("json of ResponseLeChat - factGeneratedRaw = ", factGeneratedRaw)
       const factGenerated = JSON.parse(
         factGeneratedRaw.choices[0].message.content
       );
