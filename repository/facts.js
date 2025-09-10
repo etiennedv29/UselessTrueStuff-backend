@@ -192,6 +192,7 @@ const modifyVoteInDb = async (factId, voteType, userId) => {
 };
 
 const factGenerationByAI = async () => {
+  console.log("repo facts - factGenerationByAI")
   try {
     const responseLeChat = await fetch(
       "https://api.mistral.ai/v1/agents/completions",
@@ -212,6 +213,7 @@ const factGenerationByAI = async () => {
         }),
       }
     );
+    console.log("responseLeChat = ", responseLeChat)
     if (!responseLeChat.ok) {
       const errorText = await responseLeChat.text();
       console.error("❌ Mistral Error body fact generator:\n", errorText);

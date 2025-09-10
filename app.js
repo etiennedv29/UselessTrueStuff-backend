@@ -28,20 +28,5 @@ app.use('/facts',factsRouter);
 app.use('/comments', commentsRouter)
 app.use('/emails',emailsRouter)
 
-//const { dailyFactGenerator } = require("./controllers/facts")
-// const startServer = async () => {
-//     try {
-//       // Exécution de la fonction de génération de fait au démarrage du serveur
-//       console.log("Starting daily fact generation...");
-//       const fact = await dailyFactGenerator(); // Appel à la fonction qui génère un fait
-//       console.log("Generated Fact:", fact);
-//     } catch (error) {
-//       console.error("Error during daily fact generation:", error);
-//     }
-  
-//   };
-  
-//   // Lancer la fonction au démarrage
-//   startServer();
 
 module.exports = app;
