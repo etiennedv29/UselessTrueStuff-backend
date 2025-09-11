@@ -203,7 +203,7 @@ const forgotPassword = async (req, res) => {
 
     //Cas où l'utilisateur est connecté avec social Login
     if (user.connectionWithSocials) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         socialConnectionProvider: user.socialConnectionProvider,
         message: `Tu es enregistré avec ton compte ${user.socialConnectionProvider}, essaie avec pour voir !`,
