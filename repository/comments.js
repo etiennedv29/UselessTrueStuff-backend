@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 
 const addCommentInDb = async (data) => {
-  console.log("repo - addCommentInDb : ", data.slice(0, 30));
+  console.log("repo - addCommentInDb : ", data.text.slice(0, 30));
 
   try {
     let newComment = {
