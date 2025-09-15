@@ -4,7 +4,7 @@ const{sendEmailSafe} = require("../utils/emails")
 const addComment = async (req, res, next) => {
   console.log("comment Controller - addComment");
   try {
-    console.log("adding comment : ", req.body.slice(0,30));
+    console.log("adding comment : ", req.body.text.slice(0,30));
     const addedComment = await addCommentInDb(req.body);
     if (!addedComment) {
       return res.status(500).json({ error: "Comment was not added" });
