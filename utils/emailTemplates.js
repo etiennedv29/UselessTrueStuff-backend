@@ -6,7 +6,7 @@ function esc(s = "") {
     .replace(/>/g, "&gt;");
 }
 
-// Layout commun
+// Layout commun avec styles inline pour compatibilité email
 function layout({ subject, bodyHtml }) {
   return `<!doctype html>
   <html lang="fr">
@@ -14,34 +14,41 @@ function layout({ subject, bodyHtml }) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>${esc(subject)}</title>
-    <style>
-      .wrapper { background:#f6f7fb; padding:24px; }
-      .container {
-        max-width:600px; margin:0 auto; background:#ffffff; border-radius:12px;
-        border:1px solid #e8e8ef; overflow:hidden;
-        font-family: "Trebuchet MS","Lucida Sans Unicode","Lucida Grande","Lucida Sans",Arial,sans-serif;
-        color:#0b0c1a;
-      }
-      .header { background:#0b0c1a; color:#FFFB08; padding:16px 20px; font-weight:700; font-size:18px; }
-      .content { padding:20px; line-height:1.6; font-size:16px; }
-      .cta {
-        display:inline-block; padding:10px 16px; border-radius:8px; text-decoration:none;
-        background:#FFFB08; color:#0b0c1a; font-weight:700;
-      }
-      .muted { color:#6b7280; font-size:13px; }
-      .divider { height:1px; background:#e8e8ef; border:0; margin:16px 0; }
-      .footer { padding:14px 20px; font-size:12px; color:#6b7280; }
-    </style>
   </head>
-  <body className="wrapper">
-    <table role="presentation" className="container" cellpadding="0" cellspacing="0" width="100%">
-      <tr><td className="header">Useless True Stuff</td></tr>
-      <tr><td className="content">
-        ${bodyHtml}
-        <hr className="divider" />
-        <p className="muted">Si vous n’êtes pas à l’origine de cette action, vous pouvez ignorer ce message.</p>
-      </td></tr>
-      <tr><td className="footer">© ${new Date().getFullYear()} Useless True Stuff</td></tr>
+  <body style="margin:0;padding:24px;background:#f6f7fb;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" 
+           style="max-width:600px;margin:0 auto;background:#ffffff;
+                  border-radius:12px;border:1px solid #e8e8ef;
+                  font-family:'Trebuchet MS','Lucida Sans Unicode','Lucida Grande','Lucida Sans',Arial,sans-serif;
+                  color:#0b0c1a;">
+      <tr>
+        <td style="background:#0b0c1a;color:#1ad4ff;padding:16px 20px;font-weight:700;font-size:18px;">
+          Useless True Stuff
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:20px;line-height:1.6;font-size:16px;">
+          ${bodyHtml}
+          <hr style="height:1px;background:#e8e8ef;border:0;margin:16px 0;" />
+          <p style="color:#6b7280;font-size:13px;">
+            Si vous n’êtes pas à l’origine de cette action, vous pouvez ignorer ce message.
+          </p>
+          <p style="font-size:13px;color:#6b7280;margin-top:20px;">
+            Gérer mes préférences de notification : 
+            <a href="https://www.uselesstruestuff.info/account" 
+              style="color:#6b7280;text-decoration:underline;cursor:pointer;">
+              Mon compte
+            </a>
+          </p>
+
+        </td>
+        
+      </tr>
+      <tr>
+        <td style="padding:14px 20px;font-size:12px;color:#6b7280;">
+          © ${new Date().getFullYear()} Useless True Stuff
+        </td>
+      </tr>
     </table>
   </body>
   </html>`;
@@ -53,16 +60,16 @@ const templates = {
     const subject = "Bienvenue sur Useless True Stuff 🎉";
     const text = `Bonjour ${ctx.firstName || ""},
   
-  Ton inscription est confirmée !
-  Nous sommes heureux de te compter parmi nous.
+Ton inscription est confirmée !
+Nous sommes heureux de te compter parmi nous.
   
-  — L’équipe UTS`;
+— L’équipe UTS`;
     const bodyHtml = `
-        <p>Bonjour ${esc(ctx.firstName || "")},</p>
-        <p><strong>Ton inscription est confirmée !</strong></p>
-        <p>Nous sommes heureux de te compter parmi nous.</p>
-        <p>— L’équipe UTS</p>
-      `;
+      <p>Bonjour ${esc(ctx.firstName || "")},</p>
+      <p><strong>Ton inscription est confirmée !</strong></p>
+      <p>Nous sommes heureux de te compter parmi nous.</p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -71,26 +78,27 @@ const templates = {
     const subject = "Ton info a été validée 🎉";
     const text = `Bravo ${ctx.username}!
   
-  Ton info "${ctx.title || "Ton info"}" a été validée et est maintenant visible.
-  ${ctx.factUrl ? `Lien : ${ctx.factUrl}` : ""}
+Ton info "${ctx.title || "Ton info"}" a été validée et est maintenant visible.
+${ctx.factUrl ? `Lien : ${ctx.factUrl}` : ""}
   
-  Merci pour ta participation !
-  — L’équipe UTS`;
+Merci pour ta participation !
+— L’équipe UTS`;
     const bodyHtml = `
-        <p><strong>Bravo !</strong></p>
-        <p>Ton info "<strong>${esc(
-          ctx.title || "Ton info"
-        )}</strong>" a été validée et est maintenant visible.</p>
-        ${
-          ctx.factUrl
-            ? `<p><a className="cta" href="${esc(
-                ctx.factUrl
-              )}">Voir l’info publiée</a></p>`
-            : ""
-        }
-        <p>Merci pour ta participation !</p>
-        <p>— L’équipe UTS</p>
-      `;
+      <p><strong>Bravo !</strong></p>
+      <p>Ton info "<strong>${esc(
+        ctx.title || "Ton info"
+      )}</strong>" a été validée et est maintenant visible.</p>
+      ${
+        ctx.factUrl
+          ? `<p><a href="${esc(ctx.factUrl)}" 
+                 style="display:inline-block;padding:10px 16px;border-radius:8px;
+                        text-decoration:none;background:#1ad4ff;color:#0b0c1a;
+                        font-weight:700;">Voir l’info publiée</a></p>`
+          : ""
+      }
+      <p>Merci pour ta participation !</p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -101,20 +109,20 @@ const templates = {
       ctx.reason || "Nous n’avons pas pu valider cette info pour le moment.";
     const text = `Bonjour,
   
-  Ton info "${ctx.title || "Ton info"}" n’a pas été validée.
-  Raison : ${reason}
+Ton info "${ctx.title || "Ton info"}" n’a pas été validée.
+Raison : ${reason}
   
-  Tu peux la retravailler et la soumettre à nouveau.
-  — L’équipe UTS`;
+Tu peux la retravailler et la soumettre à nouveau.
+— L’équipe UTS`;
     const bodyHtml = `
-        <p>Bonjour,</p>
-        <p>Ton info "<strong>${esc(
-          ctx.title || "Votre info"
-        )}</strong>" n’a pas été validée.</p>
-        <p>Raison : ${esc(reason)}</p>
-        <p>Tu peux la retravailler et la soumettre à nouveau.</p>
-        <p>— L’équipe UTS</p>
-      `;
+      <p>Bonjour,</p>
+      <p>Ton info "<strong>${esc(
+        ctx.title || "Votre info"
+      )}</strong>" n’a pas été validée.</p>
+      <p>Raison : ${esc(reason)}</p>
+      <p>Tu peux la retravailler et la soumettre à nouveau.</p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -123,17 +131,17 @@ const templates = {
     const subject = "Ton commentaire a bien été posté 💬";
     const text = `Bonjour,
   
-  Ton commentaire a bien été envoyé sur : "${ctx.factTitle || "cette info"}".
-  Merci pour ta participation !
-  — L’équipe UTS`;
+Ton commentaire a bien été envoyé sur : "${ctx.factTitle || "cette info"}".
+Merci pour ta participation !
+— L’équipe UTS`;
     const bodyHtml = `
-        <p>Bonjour,</p>
-        <p>Ton commentaire a bien été posté sur : "<strong>${esc(
-          ctx.factTitle || "cette info"
-        )}</strong>".</p>
-        <p>Merci pour ta participation !</p>
-        <p>— L’équipe UTS</p>
-      `;
+      <p>Bonjour,</p>
+      <p>Ton commentaire a bien été posté sur : "<strong>${esc(
+        ctx.factTitle || "cette info"
+      )}</strong>".</p>
+      <p>Merci pour ta participation !</p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -145,20 +153,21 @@ const templates = {
       : "Ce lien expire bientôt.";
     const text = `Bonjour,
   
-  Tu as demandé la réinitialisation de ton mot de passe.
-  Lien : ${ctx.resetUrl}
+Tu as demandé la réinitialisation de ton mot de passe.
+Lien : ${ctx.resetUrl}
   
-  ${expires}
-  — L’équipe UTS`;
+${expires}
+— L’équipe UTS`;
     const bodyHtml = `
-        <p>Bonjour,</p>
-        <p>Tu as demandé la réinitialisation de ton mot de passe.</p>
-        <p><a className="cta" href="${esc(
-          ctx.resetUrl || "#"
-        )}">Réinitialiser mon mot de passe</a></p>
-        <p>${esc(expires)}</p>
-        <p>— L’équipe UTS</p>
-      `;
+      <p>Bonjour,</p>
+      <p>Tu as demandé la réinitialisation de ton mot de passe.</p>
+      <p><a href="${esc(ctx.resetUrl || "#")}" 
+            style="display:inline-block;padding:10px 16px;border-radius:8px;
+                   text-decoration:none;background:#1ad4ff;color:#0b0c1a;
+                   font-weight:700;">Réinitialiser mon mot de passe</a></p>
+      <p>${esc(expires)}</p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -167,22 +176,23 @@ const templates = {
     const subject = "Ton mot de passe a été réinitialisé ✅";
     const text = `Bonjour,
   
-  Ton mot de passe a été réinitialisé avec succès.
-  ${ctx.loginUrl ? `Tu peux te connecter ici : ${ctx.loginUrl}` : ""}
+Ton mot de passe a été réinitialisé avec succès.
+${ctx.loginUrl ? `Tu peux te connecter ici : ${ctx.loginUrl}` : ""}
   
-  — L’équipe UTS`;
+— L’équipe UTS`;
     const bodyHtml = `
-        <p>Bonjour,</p>
-        <p>Ton mot de passe a été réinitialisé avec succès.</p>
-        ${
-          ctx.loginUrl
-            ? `<p><a className="cta" href="${esc(
-                ctx.loginUrl
-              )}">Me connecter</a></p>`
-            : ""
-        }
-        <p>— L’équipe UTS</p>
-      `;
+      <p>Bonjour,</p>
+      <p>Ton mot de passe a été réinitialisé avec succès.</p>
+      ${
+        ctx.loginUrl
+          ? `<p><a href="${esc(ctx.loginUrl)}" 
+                 style="display:inline-block;padding:10px 16px;border-radius:8px;
+                        text-decoration:none;background:#1ad4ff;color:#0b0c1a;
+                        font-weight:700;">Me connecter</a></p>`
+          : ""
+      }
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 
@@ -191,47 +201,69 @@ const templates = {
     const subject = "Ton compte a été supprimé";
     const text = `Bonjour,
   
-  Ton compte a bien été supprimé :
-  - tes données personnelles sont supprimées définitivement 
-  - tes données publiques (commentaires et likes) sont anonymisées
+Ton compte a bien été supprimé :
+- tes données personnelles sont supprimées définitivement 
+- tes données publiques (commentaires et likes) sont anonymisées
   
-  Merci d’avoir fait partie de la communauté.
-
-  — L’équipe UTS`;
-    const bodyHtml = `
-        <p>Bonjour,</p>
-        <p>Ton compte a bien été supprimé :</p>
-        <p> - tes données personnelles sont supprimées définitivement </p>
-        <p> - tes données publiques (commentaires et likes) sont anonymisées</p>
-        
-        <p>Merci d’avoir fait partie de la communauté.</p>
-
-        <p>— L’équipe UTS</p>
-      `;
-    return { subject, text, html: layout({ subject, bodyHtml }) };
-  },
-  // 8) notification quotidienne du nouveau fact
-  dailyFact_notificationEmail: (ctx) => {
-    const subject = `L'info toute fraîche : ${ctx.factTitle}`;
-    const text = `Hello !
-
-Ta petite dose d'info du jour :
-
-${ctx.factTitle}
-${ctx.factDescription}
-
-Pour un petit like, c'est par là : ${ctx.factUrl}
-Et pour en découvrir plein d'autres, c'est sur www.uselesstruestuff.info !
-
+Merci d’avoir fait partie de la communauté.
 — L’équipe UTS`;
     const bodyHtml = `
-<p>Hello !</p>
-<p>Ta petite dose d'info du jour :</p>
-<h2><a href="${esc(ctx.factUrl || "#")}">${esc(ctx.factTitle)}</a></h2>
-<p><a href="${esc(ctx.factUrl || "#")}">${esc(ctx.factDescription)}</a></p>
-<p><a className="cta" href="https://www.uselesstruestuff.info">Et pour en découvrir plein d'autres, c'est sur www.uselesstruestuff.info</a></p>
-<p>— L’équipe UTS</p>
-`;
+      <p>Bonjour,</p>
+      <p>Ton compte a bien été supprimé :</p>
+      <p>- tes données personnelles sont supprimées définitivement</p>
+      <p>- tes données publiques (commentaires et likes) sont anonymisées</p>
+      <p>Merci d’avoir fait partie de la communauté.</p>
+      <p>— L’équipe UTS</p>
+    `;
+    return { subject, text, html: layout({ subject, bodyHtml }) };
+  },
+
+  // 8) Notification quotidienne du nouveau fact
+  dailyFact_notificationEmail: (ctx) => {
+    const subject = `L'info toute fraîche : "${ctx.factTitle}"`;
+    const text = `Hello !
+  
+  Ta petite dose d'info du jour :
+  
+  ${ctx.factTitle}
+  ${ctx.factDescription}
+  
+  Pour un petit like, c'est par là : ${ctx.factUrl}
+  Et pour en découvrir plein d'autres, c'est sur www.uselesstruestuff.info !
+  
+  — L’équipe UTS`;
+    const bodyHtml = `
+      <p>Hello !</p>
+      <p>Ta petite dose d'info du jour :</p>
+  
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" 
+             style="background:#f0f9ff;border-radius:8px;padding:12px;margin:16px 0;">
+        <tr>
+          <td style="vertical-align:top;">
+            <a href="${esc(ctx.factUrl || "#")}" target="_blank" 
+               style="color:#0b0c1a;text-decoration:none;">
+              <h2 style="margin:0;font-size:18px;font-weight:bold;">${esc(
+                ctx.factTitle
+              )}</h2>
+            </a>
+            <div style="margin-top:8px;font-size:14px;line-height:1.5;color:#0b0c1a;">
+              <a href="${esc(ctx.factUrl || "#")}" target="_blank" 
+                 style="color:#0b0c1a;text-decoration:none;">
+                ${esc(ctx.factDescription)}
+              </a>
+            </div>
+          </td>
+        </tr>
+      </table>
+  
+      <p>
+        Et pour en découvrir plein d'autres, c'est par ici : <a href="https://www.uselesstruestuff.info" 
+           style="display:inline-block;padding:10px 16px;border-radius:8px;
+                  text-decoration:none;background:#1ad4ff;color:#0b0c1a;
+                  font-weight:700;">Découvrir plus de faits</a>
+      </p>
+      <p>— L’équipe UTS</p>
+    `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
 };

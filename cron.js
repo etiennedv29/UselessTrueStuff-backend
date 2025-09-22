@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+require("dotenv").config();
 const mongoose = require("mongoose");
 const { dailyFactGenerator } = require("./controllers/facts");
 const { sendEmailSafe } = require("./utils/emails");
 const User = require("./models/users"); // adapte le chemin si besoin
+
 
 async function runCron() {
   try {
