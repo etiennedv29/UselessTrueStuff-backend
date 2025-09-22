@@ -1,6 +1,33 @@
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
 
+const preferencesSchema = new mongoose.Schema(
+  {
+    commentValidationNotification: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+    voteSubmissionNotification: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    factVerificationNotification: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+    dailyFactUpdateNotification: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const userSchema = mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -34,6 +61,7 @@ const userSchema = mongoose.Schema({
       default: [],
     },
   ],
+  preferences: preferencesSchema,
 });
 
 const User = mongoose.model("users", userSchema);

@@ -70,48 +70,47 @@ const checkToken = async (token) => {
 
 const updateUserAccount = async (infos) => {
   console.log("users repo - updateUserAccount");
+
   try {
-    const {
-      id = infos.userId,
-      username,
-      email,
-      resetPasswordToken,
-      resetPasswordTokenExpirationDate,
-      password,
-    } = infos;
+    // if userId alors on trouve le user, et on prend tous les champs possibles du user
+    if (!infos.userId && !infos.email) {
+      throw new Error("Ni userIDd, ni email fournis pour la mise à jour");
+    }
+    const searchField = infos.userId
+      ? { _id: infos.userId }
+      : { email: infos.email };
+    const userToUpdate = await User.findOne(searchField);
+    console.log("userToupdate = ", userToUpdate);
+
+    if (!userToUpdate) {
+      throw new Error("Utilisateur non trouvé.");
+    }
+
+    // if c'est bon alors on crée un "possibleFieldsToUpdate" et on cherche un par un les champs dans infos
+    const userObject = userToUpdate.toObject(); // Convertit en objet JS pur
+    const possibleFieldsToUpdate = Object.keys(userObject).filter(field => !field.startsWith('_'));;
     const updateFields = {};
 
-    if ("username" in infos) updateFields.username = username;
-    if ("email" in infos) updateFields.email = email;
-    if ("resetPasswordToken" in infos)
-      updateFields.resetPasswordToken = resetPasswordToken;
-    if ("resetPasswordTokenExpirationDate" in infos)
-      updateFields.resetPasswordTokenExpirationDate =
-        resetPasswordTokenExpirationDate;
-    if ("password" in infos) updateFields.password = password;
+    possibleFieldsToUpdate.forEach((field) => {
+      if (field in infos && infos[field] != undefined) {
+        updateFields[field] = infos[field];
+      }
+    });
+    const updatedUser = await User.findOneAndUpdate(
+      searchField,
+      { $set: updateFields },
+      { new: true } // Retourne le document modifié
+    );
 
-    if (id) {
-      const updatedUser = await User.findOneAndUpdate(
-        { _id: id },
-        { $set: updateFields },
-        { new: true } // renvoie le document modifié
-      );
-      return updatedUser;
-    } else if (email) {
-      const updatedUser = await User.findOneAndUpdate(
-        { email: email },
-        { $set: updateFields },
-        { new: true } // renvoie le document modifié
-      );
-      return updatedUser;
-    }
+    return updatedUser;
   } catch (exception) {
-    res.status(500).json({ error: "Database Error while updating account" });
+    console.error("Erreur lors de la mise à jour du compte :", exception);
+    throw new Error("Database Error while updating account");
   }
 };
 
 const softDeleteUserById = async (userId) => {
-  console.log("users repo-  softDeleteUserById");
+  console.log("users repo - softDeleteUserById");
   try {
     const result = await User.findByIdAndUpdate(
       userId,
