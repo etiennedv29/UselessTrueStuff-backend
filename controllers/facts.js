@@ -67,36 +67,41 @@ const checkFact = async (req, res, next) => {
     //Prise en compte du cas où le fact est generated par dailyFact (sans mail)
     let email = "";
 
-    if (!checkedFact.userID.email) {
+    if (checkedFact.userID.username === "dailyFact") {
       email = "edevalmont@gmail.com";
     } else {
       email = checkedFact.userID.email;
     }
-    if (checkedFact.status === "validated") {
-      //envoi de la validation par mail
-      sendEmailSafe({
-        to: email,
-        type: "info_validated",
-        ctx: {
-          username: checkedFact.userID.username,
-          title: checkedFact.title,
-          factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
-        },
-      });
-    } else if (checkedFact.status === "rejected") {
-      //envoi du rejet par mail
-      sendEmailSafe({
-        to: checkedFact.userID.email,
-        type: "info_rejected",
-        ctx: {
-          username: checkedFact.userID.username,
-          title: checkedFact.title,
-          reason:
-            checkedFact.justification ||
-            "Pas assez vrai, ou pas assez intéressant",
-        },
-      });
-    }
+
+    // vérification que l'utilisateur est OK pour les notifications par mail
+    if (checkedFact.userID.preferences.dailyFactUpdateNotification === true) {
+      if (checkedFact.status === "validated") {
+        //envoi de la validation par mail
+        sendEmailSafe({
+          to: email,
+          type: "info_validated",
+          ctx: {
+            username: checkedFact.userID.username,
+            title: checkedFact.title,
+            factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
+          },
+        });
+      } else if (checkedFact.status === "rejected") {
+        //envoi du rejet par mail
+        sendEmailSafe({
+          to: checkedFact.userID.email,
+          type: "info_rejected",
+          ctx: {
+            username: checkedFact.userID.username,
+            title: checkedFact.title,
+            reason:
+              checkedFact.justification ||
+              "Pas assez vrai, ou pas assez intéressant",
+          },
+        });
+      }
+    } 
+    // dans tous les cas on retourne le checkedFact
     res.json(checkedFact);
   } catch (exception) {
     console.log(exception);

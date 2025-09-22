@@ -210,6 +210,30 @@ const templates = {
       `;
     return { subject, text, html: layout({ subject, bodyHtml }) };
   },
+  // 8) notification quotidienne du nouveau fact
+  dailyFact_notificationEmail: (ctx) => {
+    const subject = `L'info toute fraîche : ${ctx.factTitle}`;
+    const text = `Hello !
+
+Ta petite dose d'info du jour :
+
+${ctx.factTitle}
+${ctx.factDescription}
+
+Pour un petit like, c'est par là : ${ctx.factUrl}
+Et pour en découvrir plein d'autres, c'est sur www.uselesstruestuff.info !
+
+— L’équipe UTS`;
+    const bodyHtml = `
+<p>Hello !</p>
+<p>Ta petite dose d'info du jour :</p>
+<h2><a href="${esc(ctx.factUrl || "#")}">${esc(ctx.factTitle)}</a></h2>
+<p><a href="${esc(ctx.factUrl || "#")}">${esc(ctx.factDescription)}</a></p>
+<p><a className="cta" href="https://www.uselesstruestuff.info">Et pour en découvrir plein d'autres, c'est sur www.uselesstruestuff.info</a></p>
+<p>— L’équipe UTS</p>
+`;
+    return { subject, text, html: layout({ subject, bodyHtml }) };
+  },
 };
 
 function buildEmail(type, ctx = {}) {

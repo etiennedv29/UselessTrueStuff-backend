@@ -4,7 +4,7 @@ const { getUserById, getUserByToken } = require("./users");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
-const { sendEmailSafe } = require("../utils/emails");
+
 
 const getFacts = async ({ userId, factId, tags, offset, limit }) => {
   console.log("repo - getFacts with params:", {

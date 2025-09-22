@@ -1,5 +1,7 @@
 const { addCommentInDb } = require("../repository/comments");
 const{sendEmailSafe} = require("../utils/emails")
+const {getUserById} = require("../repository/users")
+
 
 const addComment = async (req, res, next) => {
   console.log("comment Controller - addComment");
@@ -11,8 +13,10 @@ const addComment = async (req, res, next) => {
     }
     res.json(addedComment);
 
-    //envoi de la confirmation du commentaire par mail
-    sendEmailSafe({
+    //Vérification des préférences mail de l'utilisateur 
+    const emailConfirmation = addedComment.userId.preferences.commentValidationNotification
+    //envoi de la confirmation du commentaire par mail si OK de l'utilisateur
+    emailConfirmation && sendEmailSafe({
       to: addedComment.userID.email,
       type: "comment_sent",
       ctx: {
