@@ -148,6 +148,7 @@ const findVotesByFactForUser = async (req, res, next) => {
 
 const updateAccount = async (req, res, next) => {
   console.log("users controller - updateAccount");
+  console.log("req.body =", req.body)
   try {
     const updatedUser = await updateUserAccount(req.body);
     res.json(updatedUser);

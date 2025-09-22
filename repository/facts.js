@@ -22,8 +22,6 @@ const getFacts = async ({ userId, factId, tags, offset, limit }) => {
   if (!limit) limit = 200;
   if (!offset) offset = 0;
 
-  console.log({ searchParams });
-
   return await Fact.find(searchParams)
     .populate("comments")
     .populate("userID")
