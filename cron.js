@@ -5,6 +5,10 @@ const { dailyFactGenerator } = require("./controllers/facts");
 const { sendEmailSafe } = require("./utils/emails");
 const User = require("./models/users"); // adapte le chemin si besoin
 
+// fonction utilitaire dormant entre 2 envois de mails  
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function runCron() {
   try {
@@ -26,7 +30,7 @@ async function runCron() {
 
     console.log(`📧 ${users.length} utilisateurs à notifier`);
 
-    // 3) Envoyer les mails via ton utilitaire
+    // 3) Envoyer les mails avec limiteur
     for (const user of users) {
       await sendEmailSafe({
         to: user.email,
@@ -39,6 +43,9 @@ async function runCron() {
       });
       console.log(`✅ Mail envoyé à ${user.email}`);
     }
+
+    // Pause de 501 ms pour respecter 2 mails/sec de Resend
+    await sleep(501);
 
     process.exit(0);
   } catch (err) {
