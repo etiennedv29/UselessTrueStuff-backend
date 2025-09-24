@@ -12,6 +12,8 @@ const addCommentInDb = async (data) => {
       author: new mongoose.Types.ObjectId(data.author),
       text: data.text,
       submittedAt: data.submittedAt,
+      moderatedText : data.moderatedText,
+      moderatedCategories : data.moderatedCategories
     };
     const updatedFact = await Fact.findByIdAndUpdate(data.factId, {
       $push: { comments: newComment },

@@ -8,6 +8,8 @@ const commentSchema = new mongoose.Schema({
     required: true,
   },
   text: { type: String, required: true, minlength: 5, maxlength: 500 },
+  moderatedText: { type: String, default: "" },
+  moderatedCategories: { type: Array, default: [] },
   submittedAt: { type: Date, required: true },
 });
 
