@@ -6,7 +6,6 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "@mistralai/mistralai": "^1.6.0",
     "axios": "^1.10.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "~1.4.4",
@@ -20,6 +19,6 @@
     "node-fetch": "2",
     "resend": "^6.0.1",
     "uid2": "^1.0.0",
-    "zod": "^3.24.3"
+    "zod": "^4.1.11"
   }
 }
