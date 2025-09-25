@@ -42,10 +42,11 @@ async function runCron() {
         },
       });
       console.log(`✅ Mail envoyé à ${user.email}`);
+          // Pause de 501 ms pour respecter 2 mails/sec de Resend
+    await sleep(501);
     }
 
-    // Pause de 501 ms pour respecter 2 mails/sec de Resend
-    await sleep(501);
+
 
     process.exit(0);
   } catch (err) {
