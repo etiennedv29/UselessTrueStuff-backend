@@ -256,11 +256,12 @@ Merci d’avoir fait partie de la communauté.
         </tr>
       </table>
   
-      <p>
-        Et pour en découvrir plein d'autres, c'est par ici : <a href="https://www.uselesstruestuff.info" 
-           style="display:inline-block;padding:10px 16px;border-radius:8px;
-                  text-decoration:none;background:#1ad4ff;color:#0b0c1a;
-                  font-weight:700;">Découvrir plus de faits</a>
+      <p style="display:flex;flex-direction:column;gap:8px;">
+        <span>Et pour en découvrir plein d'autres, c'est par ici :</span>
+        <a href="https://www.uselesstruestuff.info"
+            style="padding:10px 16px;border-radius:8px;text-decoration:none;
+            background:#1ad4ff;color:#0b0c1a;font-weight:700;
+            max-width:fit-content;">Découvrir plus de faits</a>
       </p>
       <p>— L’équipe UTS</p>
     `;

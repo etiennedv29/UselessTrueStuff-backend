@@ -31,13 +31,15 @@ async function runCron() {
     console.log(`📧 ${users.length} utilisateurs à notifier`);
 
     // 3) Envoyer les mails avec limiteur
+    const putaClicText = fact?.description.length<=80 ? fact?.description : fact?.description.slice(0, Math.max(0, fact?.description.lastIndexOf(' ', 80) || 80)) + "...Lire la suite";
+    //= on finit le mot lorsqu'on atteint le 80e caractère en cherchant l'espace suivant. Avec gestion du cas où le texte fait moins de 80 caractères et le cas pas d'espaces
     for (const user of users) {
       await sendEmailSafe({
         to: user.email,
         type: "dailyFact_notificationEmail",
         ctx: {
           factTitle: fact.title,
-          factDescription: fact.description,
+          factDescription: putaClicText, 
           factUrl: `${process.env.FRONTEND_URL}/facts/${fact._id}`, // lien direct vers le fait
         },
       });
@@ -45,8 +47,6 @@ async function runCron() {
           // Pause de 501 ms pour respecter 2 mails/sec de Resend
     await sleep(501);
     }
-
-
 
     process.exit(0);
   } catch (err) {
