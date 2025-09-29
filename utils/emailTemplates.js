@@ -18,11 +18,11 @@ function layout({ subject, bodyHtml }) {
   <body style="margin:0;padding:24px;background:#f6f7fb;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" 
            style="max-width:600px;margin:0 auto;background:#ffffff;
-                  border-radius:12px;border:1px solid #e8e8ef;
+                  border-radius:8px;border:1px solid #e8e8ef;
                   font-family:'Trebuchet MS','Lucida Sans Unicode','Lucida Grande','Lucida Sans',Arial,sans-serif;
                   color:#0b0c1a;">
       <tr>
-        <td style="background:#0b0c1a;color:#1ad4ff;padding:16px 20px;font-weight:700;font-size:18px;">
+        <td style="border-radius:8px;background:#0b0c1a;color:#1ad4ff;padding:16px 20px;font-weight:700;font-size:18px;">
           Useless True Stuff
         </td>
       </tr>
@@ -261,7 +261,7 @@ Merci d’avoir fait partie de la communauté.
         <a href="https://www.uselesstruestuff.info"
             style="padding:10px 16px;border-radius:8px;text-decoration:none;
             background:#1ad4ff;color:#0b0c1a;font-weight:700;
-            max-width:fit-content;">Découvrir plus de faits</a>
+            max-width:fit-content;">Découvrir plus d'infos</a>
       </p>
       <p>— L’équipe UTS</p>
     `;
