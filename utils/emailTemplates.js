@@ -252,6 +252,12 @@ Merci d’avoir fait partie de la communauté.
                 ${esc(ctx.factDescription)}
               </a>
             </div>
+            <div style="margin-top:8px;font-size:14px;line-height:1.5;color:#0b0c1a;">
+              <a href="${esc(ctx.factUrl || "#")}" target="_blank" 
+                 style="color:#0b0c1a;text-decoration:none;">
+               Ca t'intéresse ? Like et commente en cliquant <span style =" text-decoration: underline;">ici</span> 
+              </a>
+            </div>
           </td>
         </tr>
       </table>

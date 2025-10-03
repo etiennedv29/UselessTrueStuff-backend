@@ -9,15 +9,15 @@ const {
   checkFact,
   modifyVote,
   findVotesByFactForUser,
-  topTags
+  topTags,
 } = require("../controllers/facts");
+
+const { verifyAccessToken } = require("../middlewares/authMiddlewares");
 
 router.get("/topTags", topTags);
 router.get("/search", (req, res) => searchFacts(req, res));
-router.post("/addFact", addFact);
+router.post("/addFact", verifyAccessToken, addFact);
 router.post("/checkFact", checkFact);
-router.post("/modifyLikes", modifyVote);
-
-
+router.post("/modifyLikes", verifyAccessToken, modifyVote);
 
 module.exports = router;

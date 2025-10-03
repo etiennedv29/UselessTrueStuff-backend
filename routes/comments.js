@@ -4,10 +4,8 @@ const express = require("express");
 const router = express.Router();
 
 const { addComment } = require("../controllers/comments");
+const { verifyAccessToken } = require("../middlewares/authMiddlewares");
 
-
-router.post("/addComment", addComment);
-
-
+router.post("/addComment", verifyAccessToken, addComment);
 
 module.exports = router;

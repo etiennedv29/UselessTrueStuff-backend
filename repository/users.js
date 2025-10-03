@@ -39,14 +39,17 @@ const userSignup = async ({
   email,
   password,
   connectionWithSocials,
+  accessToken, 
+  accessTokenExpirationDate, 
+  refreshToken, 
+  refreshTokenExpirationDate, 
 }) => {
   console.log("users repo - userSignup : ", {
     firstName,
-    password,
     email,
-    connectionWithSocials,
   });
-  const hash = bcrypt.hashSync(password, 10);
+ 
+  connectionWithSocials === false ? bcrypt.hashSync(password, 10) : "";
 
   const newUser = new User({
     firstName,
@@ -54,7 +57,10 @@ const userSignup = async ({
     username,
     email,
     password: hash,
-    token: uid2(32),
+    accessToken,
+    accessTokenExpirationDate,
+    refreshToken,
+    refreshTokenExpirationDate,
     connectionWithSocials,
   });
 
