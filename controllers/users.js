@@ -11,6 +11,20 @@ const { checkBody } = require("../utils/utilFunctions");
 const bcrypt = require("bcrypt");
 const { sendEmailSafe } = require("../utils/emails");
 const uid2 = require("uid2");
+const jwt = require("jsonwebtoken");
+
+const accessTokenExpirationDuration = 30; //min
+const refreshTokenExpirationDuration = 15; //jours
+
+const generateAccessToken = (userId) => {
+  return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: `${accessTokenExpirationDuration}m`,
+  });
+};
+
+const generateRefreshToken = () => {
+  return uid2(64); //
+};
 
 const signup = async (req, res, next) => {
   console.log("users controller - signup");
@@ -32,7 +46,24 @@ const signup = async (req, res, next) => {
     const checkedemail = await getUserByEmail(req.body.email.toLowerCase());
 
     if (user === null && checkedemail === null) {
-      const userObject = await userSignup(req.body);
+      //création des tokens et dates d'expiration
+      const accessToken = generateAccessToken(req.body._id);
+      const refreshToken = generateRefreshToken();
+
+      const accessTokenExpirationDate = new Date(
+        Date.now() + accessTokenExpirationDuration * 60 * 1000
+      );
+      const refreshTokenExpirationDate = new Date(
+        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
+      );
+
+      const userObject = await userSignup(
+        ...req.body,
+        accessToken,
+        accessTokenExpirationDate,
+        refreshToken,
+        refreshTokenExpirationDate
+      );
       //confirmation par mail avant de renvoyer le nouvel utilisateur au fron
       sendEmailSafe({
         to: userObject.email,
@@ -71,13 +102,12 @@ const signin = async (req, res, next) => {
     const user = await getUserByEmail(req.body.email.toLowerCase());
 
     // On gère les différents cas
-    // cas 1 - social login mais utilisateur inconnu
 
+    // cas 1 - social login mais utilisateur inconnu
     if (!user && isSocialConnection) {
       console.log("signin cas 1");
 
       //on construit un payload pour appeler signup
-      //req.body={email: '',password: '',connectionWithSocials: true}
       const payload = {
         firstName: req.body.firstName || req.body.given_name || "",
         lastName: req.body.lastName || req.body.family_name || "",
@@ -86,9 +116,29 @@ const signin = async (req, res, next) => {
         connectionWithSocials: true,
         password: req.body.password || "",
       };
+      //Pour récupérer un _id afin de générer les tokens, on crée l'utilisateur avec seulement ces infos
       // on n'appelle pas signup, mais userSignup directement dans repository/users
       const createdUser = await userSignup(payload);
+
+      //Comme on va envoyer vers userSignup, on génère des tokens pour le nouvel utilisateur maintenant qu'on a son Id
+      const accessToken = generateAccessToken(createdUser._id);
+      const refreshToken = generateRefreshToken();
+
+      const accessTokenExpirationDate = new Date(
+        Date.now() + accessTokenExpirationDuration * 60 * 1000
+      );
+      const refreshTokenExpirationDate = new Date(
+        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
+      );
+
+      // Mise à jour en base avec les tokens
+      createdUser.accessToken = accessToken;
+      createdUser.accessTokenExpirationDate = accessTokenExpirationDate;
+      createdUser.refreshToken = refreshToken;
+      createdUser.refreshTokenExpirationDate = refreshTokenExpirationDate;
+      await createdUser.save();
       //console.log({ createdUser });
+
       return res.json(createdUser);
 
       // cas 2 - cas normal de connexion avec mot de passe sans social login
@@ -103,12 +153,52 @@ const signin = async (req, res, next) => {
           .status(401)
           .json({ error: "User not found or wrong password" });
       }
+
+      //on doit maintenant vérifier pour update des tokens, on a bien le _id via user du getUserByEmail
+      const accessToken = generateAccessToken(user._id.toString());
+      const refreshToken = generateRefreshToken();
+
+      const accessTokenExpirationDate = new Date(
+        Date.now() + accessTokenExpirationDuration * 60 * 1000
+      );
+      const refreshTokenExpirationDate = new Date(
+        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
+      );
+
+      // Mise à jour en base via l’instance mongoose
+      user.accessToken = accessToken;
+      user.accessTokenExpirationDate = accessTokenExpirationDate;
+      user.refreshToken = refreshToken;
+      user.refreshTokenExpirationDate = refreshTokenExpirationDate;
+      await user.save();
+
       return res.json(user);
     }
+
     // cas 3 - social Login et l'utilisateur existe bien
     else if (user && user.connectionWithSocials === true) {
       console.log("signin cas 3");
       // pour le futur : mise à jour auto des informations username etc parce qu'elles sont différentes dans le social login
+
+      // user._id existe, on génère de nouveaux tokens
+      const accessToken = generateAccessToken(user._id.toString());
+      const refreshToken = generateRefreshToken();
+
+      const accessTokenExpirationDate = new Date(
+        Date.now() + accessTokenExpirationDuration * 60 * 1000
+      );
+      const refreshTokenExpirationDate = new Date(
+        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
+      );
+
+      // Mise à jour en base via l’instance mongoose
+      user.accessToken = accessToken;
+      user.accessTokenExpirationDate = accessTokenExpirationDate;
+      user.refreshToken = refreshToken;
+      user.refreshTokenExpirationDate = refreshTokenExpirationDate;
+      console.log({ user });
+      await user.save();
+
       res.json(user);
 
       // cas 4 - échec autre
@@ -119,6 +209,53 @@ const signin = async (req, res, next) => {
   } catch (exception) {
     // cas 5 - échec du signin global
     console.log("signin cas 5");
+    console.log("détail de l'erreur = ", exception);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const refreshTokens = async (req, res) => {
+  console.log("users controller - refresh");
+  const { email, refreshToken } = req.body;
+
+  try {
+    // Vérification que les infos sont présentes
+    if (!email || !refreshToken) {
+      return res.status(400).json({ error: "Email et refreshToken requis" });
+    }
+
+    // On retrouve l'utilisateur
+    const user = await getUserByEmail(email.toLowerCase());
+    if (!user) {
+      return res.status(401).json({ error: "Utilisateur introuvable" });
+    }
+
+    // Vérification du refreshToken et de sa date
+    if (user.refreshToken !== refreshToken) {
+      return res.status(401).json({ error: "Refresh token invalide" });
+    }
+    if (new Date() >= user.refreshTokenExpirationDate) {
+      return res.status(401).json({ error: "Refresh token expiré" });
+    }
+
+    // Génération d’un nouveau accessToken
+    const newAccessToken = generateAccessToken(user._id.toString());
+    const newAccessTokenExpirationDate = new Date(
+      Date.now() + accessTokenExpirationDuration * 60 * 1000
+    );
+
+    // Mise à jour en base
+    user.accessToken = newAccessToken;
+    user.accessTokenExpirationDate = newAccessTokenExpirationDate;
+    await user.save();
+
+    // Retourne au front
+    return res.json({
+      accessToken: user.accessToken,
+      accessTokenExpirationDate: user.accessTokenExpirationDate,
+    });
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -148,7 +285,7 @@ const findVotesByFactForUser = async (req, res, next) => {
 
 const updateAccount = async (req, res, next) => {
   console.log("users controller - updateAccount");
-  console.log("req.body =", req.body)
+  console.log("req.body =", req.body);
   try {
     const updatedUser = await updateUserAccount(req.body);
     res.json(updatedUser);
@@ -318,4 +455,5 @@ module.exports = {
   deleteAccount,
   forgotPassword,
   resetPassword,
+  refreshTokens,
 };

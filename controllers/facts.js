@@ -47,9 +47,18 @@ const searchFacts = async (req, res, next) => {
 const addFact = async (req, res, next) => {
   console.log("facts controller - addFact");
   try {
+    //on récupère une image
     const validUrl = await getValidPicsumImage();
     req.body.image = validUrl;
+    //ajout du fait en db
     const addedFact = await addFactInDb(req.body);
+
+    //début de la vérification
+    //fonction checkFact sans await, pas besoin de l'attendre.
+    checkFact(addedFact).catch((err) =>
+      console.error("Erreur checkFact interne:", err)
+    );
+
     res.json(addedFact);
     return addedFact;
   } catch (exception) {
@@ -58,7 +67,55 @@ const addFact = async (req, res, next) => {
   }
 };
 
-const checkFact = async (req, res, next) => {
+//fonction seule pour vérifier les facts
+const checkFact = async (factToCheck) => {
+  console.log("facts controller - checkFact function");
+  try {
+    const { description, _id } = factToCheck; // factToCheck vient de Mongo, donc c’est `_id`
+    const checkedFact = await checkFactWithAI(description, _id);
+
+    //email en prévision de l'envoi du mail
+    let email =
+      checkedFact.userID.username === "dailyFact"
+        ? "edevalmont@gmail.com"
+        : checkedFact.userID.email;
+
+    //vérification RGPD de l'envoi du mail
+    if (checkedFact.userID.preferences.dailyFactUpdateNotification === true) {
+      if (checkedFact.status === "validated") {
+        sendEmailSafe({
+          to: email,
+          type: "info_validated",
+          ctx: {
+            username: checkedFact.userID.username,
+            title: checkedFact.title,
+            factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
+          },
+        });
+      } else if (checkedFact.status === "rejected") {
+        sendEmailSafe({
+          to: checkedFact.userID.email,
+          type: "info_rejected",
+          ctx: {
+            username: checkedFact.userID.username,
+            title: checkedFact.title,
+            reason:
+              checkedFact.justification ||
+              "Pas assez vrai, ou pas assez intéressant",
+          },
+        });
+      }
+    }
+
+    return checkedFact; //Pas de res.json, c'est une fonction interne
+  } catch (exception) {
+    console.error("Erreur checkFact:", exception);
+    throw exception; // remonte l'erreur à addFact si besoin
+  }
+};
+
+//OLD : route qui n'est plus utilisée car la vérification des facts se fait dans addFact
+const checkFactFunction = async (req, res, next) => {
   console.log("facts controller - checkFact");
   try {
     const { description, id } = req.body;
@@ -100,7 +157,7 @@ const checkFact = async (req, res, next) => {
           },
         });
       }
-    } 
+    }
     // dans tous les cas on retourne le checkedFact
     res.json(checkedFact);
   } catch (exception) {
@@ -157,7 +214,6 @@ const dailyFactGenerator = async (attempt = 1) => {
     const addedFact = await addFactInDb(fact);
 
     // Étape 3: Vérification du fait avec l'IA
-
     const checkedFact = await checkFactWithAI(fact.description, addedFact.id);
     console.log("Fait Vérifié");
     // Si le fait est validé par l'IA, mettre à jour son statut
@@ -198,6 +254,7 @@ module.exports = {
   addFact,
   searchFacts,
   checkFact,
+  checkFactFunction,
   modifyVote,
   dailyFactGenerator,
   topTags,
