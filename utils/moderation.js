@@ -27,7 +27,7 @@ const mistralModeration = async (text) => {
 
     return { moderation, flaggedCategories };
   } catch (error) {
-    console.error("Error during content moderation");
+    console.error("Error during content moderation", error);
   }
 };
 

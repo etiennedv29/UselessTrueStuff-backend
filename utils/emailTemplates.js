@@ -109,14 +109,14 @@ Merci pour ta participation !
       ctx.reason || "Nous n’avons pas pu valider cette info pour le moment.";
     const text = `Bonjour,
   
-Ton info "${ctx.title || "Ton info"}" n’a pas été validée.
+Après vérification par l'IA, ton info "${ctx.title || "Ton info"}" n’a pas été validée.
 Raison : ${reason}
   
 Tu peux la retravailler et la soumettre à nouveau.
 — L’équipe UTS`;
     const bodyHtml = `
       <p>Bonjour,</p>
-      <p>Ton info "<strong>${esc(
+      <p>Après vérification par l'IA, ton info "<strong>${esc(
         ctx.title || "Votre info"
       )}</strong>" n’a pas été validée.</p>
       <p>Raison : ${esc(reason)}</p>
