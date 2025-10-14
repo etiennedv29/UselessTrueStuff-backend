@@ -27,7 +27,7 @@ const generateRefreshToken = () => {
 };
 
 const signup = async (req, res, next) => {
-  console.log("users controller - signup");
+  console.log("users controller - signup - ", req?.body?.username);
   try {
     if (
       !req.body.connectionWithSocials &&
