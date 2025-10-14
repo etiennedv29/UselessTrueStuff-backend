@@ -57,20 +57,20 @@ const signup = async (req, res, next) => {
         Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
       );
 
-      const userObject = await userSignup(
+      const userObject = await userSignup({
         ...req.body,
         accessToken,
         accessTokenExpirationDate,
         refreshToken,
-        refreshTokenExpirationDate
-      );
+        refreshTokenExpirationDate,
+      });
+
       //confirmation par mail avant de renvoyer le nouvel utilisateur au fron
       sendEmailSafe({
         to: userObject.email,
         type: "signup_confirmation",
         ctx: { firstName: userObject.firstName },
       });
-
       res.json(userObject);
     } else {
       res.status(409).json({ error: "User already exists" });
@@ -447,6 +447,32 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+const getCurrentUser = async (req, res) => {
+  try {
+    console.log("req.user = ", req.user);
+    //pas besoin d'aller chercher le user en DB, il est déjà fourni par le middleware verifyAccessToken en fin de fonction
+    if (!req.user) {
+      return res.status(401).json({ error: "Utilisateur non identifié" });
+    }
+
+    //on édulcore le user pour ne garder que les infos ok, pas d'info sensible
+    const safeUser = {
+      _id: req.user._id,
+      username: req.user.username,
+      email: req.user.email,
+      votePlus: req.user.votePlus,
+      voteMinus: req.user.voteMinus,
+      preferences: req.user.preferences,
+      createdAt: req.user.createdAt,
+    };
+    // on renvoie
+    return res.json(safeUser);
+  } catch (error) {
+    console.error("Erreur getCurrentUser :", error);
+    res.status(500).json({ error: "Erreur interne serveur" });
+  }
+};
 module.exports = {
   signup,
   signin,
@@ -456,4 +482,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   refreshTokens,
+  getCurrentUser,
 };

@@ -39,29 +39,31 @@ const userSignup = async ({
   email,
   password,
   connectionWithSocials,
-  accessToken, 
-  accessTokenExpirationDate, 
-  refreshToken, 
-  refreshTokenExpirationDate, 
+  accessToken,
+  accessTokenExpirationDate,
+  refreshToken,
+  refreshTokenExpirationDate,
 }) => {
   console.log("users repo - userSignup : ", {
     firstName,
+    password,
     email,
   });
- 
-  connectionWithSocials === false ? bcrypt.hashSync(password, 10) : "";
-
+  const hash = bcrypt.hashSync(password, 10);
+  const socialConnectionProvider = connectionWithSocials ? "Google" : null;
   const newUser = new User({
     firstName,
     lastName,
     username,
     email,
     password: hash,
+    token: uid2(32),
+    connectionWithSocials,
+    socialConnectionProvider,
     accessToken,
     accessTokenExpirationDate,
     refreshToken,
     refreshTokenExpirationDate,
-    connectionWithSocials,
   });
 
   return await newUser.save();
@@ -94,7 +96,9 @@ const updateUserAccount = async (infos) => {
 
     // if c'est bon alors on crée un "possibleFieldsToUpdate" et on cherche un par un les champs dans infos
     const userObject = userToUpdate.toObject(); // Convertit en objet JS pur
-    const possibleFieldsToUpdate = Object.keys(userObject).filter(field => !field.startsWith('_'));;
+    const possibleFieldsToUpdate = Object.keys(userObject).filter(
+      (field) => !field.startsWith("_")
+    );
     const updateFields = {};
 
     possibleFieldsToUpdate.forEach((field) => {
