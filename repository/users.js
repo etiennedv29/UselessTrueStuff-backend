@@ -9,11 +9,14 @@ const getUserByUsername = async (username) => {
     username: { $regex: new RegExp("^" + username + "$", "i") },
   });
 };
+// Échappe tous les caractères spéciaux pour les expressions régulières
+const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const getUserByEmail = async (email) => {
-  console.log("users repo - getUserByEmail");
+  console.log("users repo - getUserByEmail - ", email);
+  // Recherche insensible à la casse d'un utilisateur par email exact
   return await User.findOne({
-    email: { $regex: new RegExp("^" + email + "$", "i") },
+    email: new RegExp(`^${escapeRegex(email)}$`, "i"),
   });
 };
 
@@ -46,7 +49,6 @@ const userSignup = async ({
 }) => {
   console.log("users repo - userSignup : ", {
     firstName,
-    password,
     email,
   });
   const hash = bcrypt.hashSync(password, 10);

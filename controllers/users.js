@@ -99,8 +99,9 @@ const signin = async (req, res, next) => {
     }
 
     //recherche de l'utilisateur par mail
+    console.log("req.body.email =", req.body.email)
     const user = await getUserByEmail(req.body.email.toLowerCase());
-
+    console.log({user})
     // On gère les différents cas
 
     // cas 1 - social login mais utilisateur inconnu
