@@ -286,7 +286,7 @@ const findVotesByFactForUser = async (req, res, next) => {
 
 const updateAccount = async (req, res, next) => {
   console.log("users controller - updateAccount");
-  console.log("req.body =", req.body);
+  //console.log("req.body =", req.body);
   try {
     const updatedUser = await updateUserAccount(req.body);
     res.json(updatedUser);
@@ -450,8 +450,8 @@ const resetPassword = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
+  console.log("users controller - getCurrentUser - ", req.user?.username)
   try {
-    console.log("req.user = ", req.user);
     //pas besoin d'aller chercher le user en DB, il est déjà fourni par le middleware verifyAccessToken en fin de fonction
     if (!req.user) {
       return res.status(401).json({ error: "Utilisateur non identifié" });

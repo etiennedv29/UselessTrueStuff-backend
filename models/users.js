@@ -3,38 +3,31 @@ const mongoose = require("mongoose");
 //  Schéma des préférences (avec updatedAt propre à ce sous-doc)
 const preferencesSchema = new mongoose.Schema(
   {
-    commentValidationNotification: {
-      type: Boolean,
-      required: true,
-      default: true,
-    },
-    voteSubmissionNotification: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    factVerificationNotification: {
-      type: Boolean,
-      required: true,
-      default: true,
-    },
-    dailyFactUpdateNotification: {
-      type: Boolean,
-      required: true,
-      default: true,
-    },
+    commentValidationNotification: Boolean,
+    voteSubmissionNotification: Boolean,
+    factVerificationNotification: Boolean,
+    dailyFactUpdateNotification: Boolean,
     updatedAt: { type: Date, default: Date.now },
   },
   { _id: false }
 );
 
+//valeurs par défaut à la création de l'utilisateur :
+const defaultPreferences = {
+  commentValidationNotification: true,
+  voteSubmissionNotification: false,
+  factVerificationNotification: true,
+  dailyFactUpdateNotification: true,
+  updatedAt: Date.now(),
+};
+
 // Schéma utilisateur
 const userSchema = new mongoose.Schema(
   {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    username: { type: String, required: true },
-    email: { type: String, required: true },
+    firstName: { type: String, required: true, default: null },
+    lastName: { type: String, required: true, default: null },
+    username: { type: String, required: true, default: null },
+    email: { type: String, required: true, default: null },
     password: {
       type: String,
       required: function () {
@@ -45,17 +38,17 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: { type: String, default: null },
     resetPasswordTokenExpirationDate: { type: Date, default: null },
 
-    connectionWithSocials: { type: Boolean, required: true },
+    connectionWithSocials: { type: Boolean, required: true, default: null },
     socialConnectionProvider: { type: String, default: null },
 
-    accessToken: { type: String, required: true },
+    accessToken: { type: String, required: true, default: null },
     accessTokenExpirationDate: {
       type: Date,
       required: true,
       default: () => new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
     },
 
-    refreshToken: { type: String, required: true },
+    refreshToken: { type: String, required: true, default: null },
     refreshTokenExpirationDate: {
       type: Date,
       required: true,
@@ -84,7 +77,11 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    preferences: preferencesSchema,
+    preferences: {
+      type: preferencesSchema,
+      required: true,
+      default: () => ({ ...defaultPreferences }),
+    },
   },
   {
     // ✅ Ajout automatique des champs createdAt et updatedAt
