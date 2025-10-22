@@ -1,5 +1,5 @@
 const mistralModeration = async (text) => {
-  console.log("utils moderation - moderation verification with Le Chat");
+  console.log("utils moderation - moderation verification with Le Chat - ", text?.slice(0,30));
 
   try {
     const responseModerationRaw = await fetch(

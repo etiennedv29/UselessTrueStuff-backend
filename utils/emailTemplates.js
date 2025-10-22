@@ -276,6 +276,7 @@ Merci d’avoir fait partie de la communauté.
 };
 
 function buildEmail(type, ctx = {}) {
+  console.log("utils emails - buildEmail - type - ", type)
   const t = templates[type];
   if (!t) throw new Error(`Template inconnu: ${type}`);
   return t(ctx);

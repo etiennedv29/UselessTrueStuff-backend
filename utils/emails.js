@@ -2,10 +2,12 @@ const { Resend } = require("resend");
 const { buildEmail } = require("./emailTemplates");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const MAIL_FROM = process.env.MAIL_FROM || "no-reply@send.uselesstruestuff.info";
+const MAIL_FROM =
+  process.env.MAIL_FROM || "no-reply@send.uselesstruestuff.info";
 
 //async function sendTransactional({ to, subject, text, html }) {
-async function sendTransactional({ to, type, ctx={}}) {
+async function sendTransactional({ to, type, ctx = {} }) {
+  console.log("utils emails - sendTransactionnal - type - ", type, " to ", to);
   try {
     const { subject, text, html } = await buildEmail(type, ctx);
 
@@ -25,12 +27,13 @@ async function sendTransactional({ to, type, ctx={}}) {
 }
 
 async function sendEmailSafe(args) {
-  console.log("utils emails - trying to sendEmailSafe")
+  console.log("utils emails - trying to sendEmailSafe");
   try {
+    console.log(sendTransactional(args));
     return await sendTransactional(args);
   } catch (e) {
     console.error("[MAIL][FAILED]", args?.type, args?.to, e?.message);
     return null;
   }
 }
-module.exports = { sendTransactional,sendEmailSafe };
+module.exports = { sendTransactional, sendEmailSafe };
