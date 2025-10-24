@@ -29,7 +29,6 @@ async function sendTransactional({ to, type, ctx = {} }) {
 async function sendEmailSafe(args) {
   console.log("utils emails - trying to sendEmailSafe");
   try {
-    console.log(sendTransactional(args));
     return await sendTransactional(args);
   } catch (e) {
     console.error("[MAIL][FAILED]", args?.type, args?.to, e?.message);
