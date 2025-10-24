@@ -89,7 +89,7 @@ const checkFact = async (factToCheck) => {
           ctx: {
             username: checkedFact.userID.username,
             title: checkedFact.title,
-            factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
+            factUrl: `https://www.uselesstruestuff.info/facts/${checkedFact._id}`,
           },
         });
       } else if (checkedFact.status === "rejected") {
@@ -140,7 +140,7 @@ const checkFactFunction = async (req, res, next) => {
           ctx: {
             username: checkedFact.userID.username,
             title: checkedFact.title,
-            factUrl: `https://www.uselesstruestuff.info/fact/${checkedFact._id}`,
+            factUrl: `https://www.uselesstruestuff.info/facts/${checkedFact._id}`,
           },
         });
       } else if (checkedFact.status === "rejected") {
