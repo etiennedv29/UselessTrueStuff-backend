@@ -46,34 +46,41 @@ const signup = async (req, res, next) => {
     const checkedemail = await getUserByEmail(req.body.email.toLowerCase());
 
     if (user === null && checkedemail === null) {
-      //création des tokens et dates d'expiration
-      const accessToken = generateAccessToken(req.body._id);
+      //création du refreshToken et date d'expiration AVANT userSignup
       const refreshToken = generateRefreshToken();
-
-      const accessTokenExpirationDate = new Date(
-        Date.now() + accessTokenExpirationDuration * 60 * 1000
-      );
       const refreshTokenExpirationDate = new Date(
         Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
       );
 
+      // on crée le user avec uniquement les infos nécessaires + refreshToken
       const userObject = await userSignup({
         ...req.body,
-        accessToken,
-        accessTokenExpirationDate,
         refreshToken,
         refreshTokenExpirationDate,
       });
 
-      //confirmation par mail avant de renvoyer le nouvel utilisateur au fron
-      sendEmailSafe({
-        to: userObject.email,
-        type: "signup_confirmation",
-        ctx: { firstName: userObject.firstName },
+      // Maintenant que l'utilisateur a un _id, on crée l'access token
+      const accessToken = generateAccessToken(userObject._id.toString());
+      const accessTokenExpirationDate = new Date(
+        Date.now() + accessTokenExpirationDuration * 60 * 1000
+      );
+
+      // Mise à jour du compte utilisateur avec l'access token
+      const updatedUser = await updateUserAccount({
+        userId: userObject._id,
+        accessToken,
+        accessTokenExpirationDate,
       });
-      res.json(userObject);
+
+      //confirmation par mail avant de renvoyer le nouvel utilisateur au front
+      sendEmailSafe({
+        to: updatedUser.email,
+        type: "signup_confirmation",
+        ctx: { firstName: updatedUser.firstName },
+      });
+      res.json(updatedUser);
     } else {
-      res.status(409).json({ error: "User already exists" });
+      res.status(409).json({ error: "Cet utilisateur existe déjà" });
     }
   } catch (exception) {
     res.status(500).json({ error: "Internal Server Error" });
@@ -99,14 +106,20 @@ const signin = async (req, res, next) => {
     }
 
     //recherche de l'utilisateur par mail
-    console.log("req.body.email =", req.body.email)
+    console.log("req.body.email =", req.body.email);
     const user = await getUserByEmail(req.body.email.toLowerCase());
-    console.log({user})
+    console.log({ user });
     // On gère les différents cas
 
     // cas 1 - social login mais utilisateur inconnu
     if (!user && isSocialConnection) {
       console.log("signin cas 1");
+
+      // on crée uniquement le refreshToken et sa date d'expiration, car on a besoin de l'_id, après création en base, pour le accessToken.
+      const refreshToken = generateRefreshToken();
+      const refreshTokenExpirationDate = new Date(
+        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
+      );
 
       //on construit un payload pour appeler signup
       const payload = {
@@ -116,31 +129,28 @@ const signin = async (req, res, next) => {
         email: req.body.email,
         connectionWithSocials: true,
         password: req.body.password || "",
+        refreshToken,
+        refreshTokenExpirationDate,
       };
-      //Pour récupérer un _id afin de générer les tokens, on crée l'utilisateur avec seulement ces infos
+
       // on n'appelle pas signup, mais userSignup directement dans repository/users
       const createdUser = await userSignup(payload);
 
       //Comme on va envoyer vers userSignup, on génère des tokens pour le nouvel utilisateur maintenant qu'on a son Id
       const accessToken = generateAccessToken(createdUser._id);
-      const refreshToken = generateRefreshToken();
 
       const accessTokenExpirationDate = new Date(
         Date.now() + accessTokenExpirationDuration * 60 * 1000
       );
-      const refreshTokenExpirationDate = new Date(
-        Date.now() + refreshTokenExpirationDuration * 24 * 60 * 60 * 1000
-      );
 
-      // Mise à jour en base avec les tokens
-      createdUser.accessToken = accessToken;
-      createdUser.accessTokenExpirationDate = accessTokenExpirationDate;
-      createdUser.refreshToken = refreshToken;
-      createdUser.refreshTokenExpirationDate = refreshTokenExpirationDate;
-      await createdUser.save();
-      //console.log({ createdUser });
+      //appel à la fonction updateUserAccount pour mettre à jour
+      const createdUserComplete = await updateUserAccount({
+        userId: createdUser._id,
+        accessToken,
+        accessTokenExpirationDate,
+      });
 
-      return res.json(createdUser);
+      return res.json(createdUserComplete);
 
       // cas 2 - cas normal de connexion avec mot de passe sans social login
     } else if (user && user.connectionWithSocials === false) {
@@ -450,7 +460,7 @@ const resetPassword = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
-  console.log("users controller - getCurrentUser - ", req.user?.username)
+  console.log("users controller - getCurrentUser - ", req.user?.username);
   try {
     //pas besoin d'aller chercher le user en DB, il est déjà fourni par le middleware verifyAccessToken en fin de fonction
     if (!req.user) {
