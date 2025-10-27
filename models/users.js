@@ -41,19 +41,10 @@ const userSchema = new mongoose.Schema(
     connectionWithSocials: { type: Boolean, required: true, default: null },
     socialConnectionProvider: { type: String, default: null },
 
-    accessToken: { type: String, required: true, default: null },
-    accessTokenExpirationDate: {
-      type: Date,
-      required: true,
-      default: () => new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
-    },
-
-    refreshToken: { type: String, required: true, default: null },
-    refreshTokenExpirationDate: {
-      type: Date,
-      required: true,
-      default: () => new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 jours
-    },
+    accessToken: { type: String, required: false, default: null },
+    accessTokenExpirationDate: { type: Date, required: false, default: null },
+    refreshToken: { type: String, required: true },
+    refreshTokenExpirationDate: { type: Date, required: true },
 
     factsSubmitted: [
       {
