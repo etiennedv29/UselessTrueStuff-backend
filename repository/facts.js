@@ -594,6 +594,32 @@ const getTopTags = async () => {
 
   return topTags.map((tag) => tag._id);
 };
+
+const updateFactImage = async (factId, url) => {
+  console.log("facts repo - updateFactImage - ", factId);
+  try {
+    // Utilisation de findOneAndUpdate pour renvoyer l'objet mis à jour
+    const updatedFact = await Fact.findOneAndUpdate(
+      { _id: factId },
+      { $set: { image: url } },
+      { new: true } // ✅ renvoie l'objet après mise à jour
+    );
+
+    if (!updatedFact) {
+      throw new Error(
+        `facts repository - updateFactImage - factId non trouvé : ${factId}`
+      );
+    }
+
+    return updatedFact;
+  } catch (error) {
+    console.error("Erreur lors de facts repositoy - updateFactImage :", error);
+    throw new Error(
+      "Erreur en base de données lors de la mise à jour de l'image"
+    );
+  }
+};
+
 module.exports = {
   getFacts,
   addFactInDb,
@@ -605,4 +631,5 @@ module.exports = {
   updateFactWithVotes,
   factGenerationByAI,
   getTopTags,
+  updateFactImage,
 };
