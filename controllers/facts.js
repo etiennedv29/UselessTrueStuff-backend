@@ -6,8 +6,9 @@ const {
   getFactById,
   factGenerationByAI,
   getTopTags,
+  updateFactImage,
 } = require("../repository/facts");
-const { getValidPicsumImage } = require("../utils/utilFunctions");
+const { getRelevantImage } = require("../utils/utilFunctions");
 const { sendEmailSafe } = require("../utils/emails");
 const mongoose = require("mongoose");
 const { Types } = require("mongoose");
@@ -47,20 +48,35 @@ const searchFacts = async (req, res, next) => {
 const addFact = async (req, res, next) => {
   console.log("facts controller - addFact");
   try {
-    //on récupère une image
-    const validUrl = await getValidPicsumImage();
-    req.body.image = validUrl;
     //ajout du fait en db
     const addedFact = await addFactInDb(req.body);
 
     //début de la vérification
-    //fonction checkFact sans await, pas besoin de l'attendre.
-    checkFact(addedFact).catch((err) =>
-      console.error("Erreur checkFact interne:", err)
-    );
+    //fonction checkFact pour valider ou rejter l'info, on cherchera l'image en fonction
+    let checkedFact;
+    try {
+      checkedFact = await checkFact(addedFact);
+    } catch (error) {
+      console.log(
+        "Erreur de checkFact interne pour le fact - ",
+        req?.body?.title,
+        "error = ",
+        error
+      );
+    }
 
-    res.json(addedFact);
-    return addedFact;
+    let addedFactComplete = checkedFact;
+    //si l'info est validée on lui donne une image
+    if (checkedFact && checkedFact.status === "validated") {
+      //on récupère une image pertinente
+      const validUrl = await getRelevantImage(checkedFact.tags || []);
+
+      //mise à jour du fact avec l'image
+      addedFactComplete = await updateFactImage(checkedFact._id, validUrl);
+    }
+    //retourne le fact final, avec image quoi qu'il arrive grâce au fallback picsum
+    res.json(addedFactComplete);
+    return addedFactComplete;
   } catch (exception) {
     console.log(exception);
     res.status(500).json({ error: "internal Servor Error with db" });
@@ -196,18 +212,19 @@ const dailyFactGenerator = async (attempt = 1) => {
     }
 
     // Étape 2: Ajouter le fait dans la base de données
-    const validUrl = await getValidPicsumImage();
+    const validUrl = await getRelevantImage();
     fact.image = validUrl; // Ajout d'une image (par exemple une image aléatoire)
 
     fact.submittedAt = new Date();
     fact.userID = new mongoose.Types.ObjectId("687158b82479b2f2a8cb3641");
-    console.log("just before addFact in Db=", fact);
+    console.log("just before addFact in Db=", fact?.title);
     if (fact.title.length > 33) {
       console.log(
         "le titre est trop long, longueur : ",
         fact.title.length,
         " caractères"
       );
+      // on retourne sur la même fonction en cas d'erreur
       return dailyFactGenerator();
     }
 

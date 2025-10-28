@@ -32,10 +32,63 @@ async function getValidPicsumImage() {
 
   return url;
 }
+async function getRelevantImage(tags) {
+  console.log("utilsFunctions - getRelevantImage - ", tags);
+
+  // Vérification basique
+  if (!tags || tags.length === 0) {
+    console.warn("Fallback direct vers picsum");
+    return getValidPicsumImage();
+  }
+
+  // On teste avec tous les tags puis un de moins à chaque fois
+  for (let precision = tags.length; precision > 0; precision--) {
+    const relevantTags = tags
+      .slice(0, precision)
+      .join("-")
+      .toLowerCase();
+
+    try {
+      const response = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+          relevantTags
+        )}&orientation=square&per_page=1`,
+        {
+          headers: {
+            Authorization: process.env.PEXELS_API_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.warn(`Pas d'image trouvée sur pexels avec la précision ${precision} - `, response.status, response.statusText);
+        continue; // on tente moins de précision
+      }
+
+      const data = await response.json();
+
+      if (data.photos && data.photos.length > 0) {
+        const photo = data.photos[0];
+        console.log("Image Pexels trouvée, precision = ",precision);
+        return photo.src.medium || photo.src.original;
+      } else {
+        console.log(`Aucune image trouvée avec ${precision} tag(s).`);
+      }
+    } catch (error) {
+      console.error(`Erreur lors de l'appel Pexels avec ${precision} tags :`, error);
+    }
+  }
+
+  // Fallback final
+  console.log("🔁 Aucun résultat trouvé sur Pexels. On passe à Picsum.");
+  return getValidPicsumImage();
+}
+
 
 module.exports = {
   firstLetterCapital,
   checkBody,
   checkEmail,
   getValidPicsumImage,
+  getRelevantImage,
 };
