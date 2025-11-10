@@ -212,7 +212,7 @@ const dailyFactGenerator = async (attempt = 1) => {
     }
 
     // Étape 2: Ajouter le fait dans la base de données
-    const validUrl = await getRelevantImage();
+    const validUrl = await getRelevantImage(fact.tags);
     fact.image = validUrl; // Ajout d'une image (par exemple une image aléatoire)
 
     fact.submittedAt = new Date();
